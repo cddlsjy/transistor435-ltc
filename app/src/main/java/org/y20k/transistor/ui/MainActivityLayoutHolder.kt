@@ -180,16 +180,30 @@ data class MainActivityLayoutHolder (var rootView: View) : MainFragmentLayoutHol
         stationNameView.text = station.name
 
         // update cover
-        val stationImageFile = File(station.image.toUri().path ?: "")
-        Glide.with(context)
-            .load(station.image)
-            .signature(ObjectKey(stationImageFile.lastModified()))
-            .error(R.drawable.ic_default_station_image_64dp)
-            .into(stationImageView)
-        if (station.imageColor != -1) {
-            stationImageView.setBackgroundColor(station.imageColor)
+        try {
+            if (!station.image.isNullOrEmpty()) {
+                val stationImageFile = File(station.image.toUri().path ?: "")
+                Glide.with(context)
+                    .load(station.image)
+                    .signature(ObjectKey(stationImageFile.lastModified()))
+                    .error(R.drawable.ic_default_station_image_64dp)
+                    .into(stationImageView)
+            } else {
+                Glide.with(context)
+                    .load(R.drawable.ic_default_station_image_64dp)
+                    .into(stationImageView)
+            }
+            if (station.imageColor != -1) {
+                stationImageView.setBackgroundColor(station.imageColor)
+            }
+            stationImageView.contentDescription = "${context.getString(R.string.descr_player_station_image)}: ${station.name}"
+        } catch (e: Exception) {
+            // Fallback to default image on any error
+            Glide.with(context)
+                .load(R.drawable.ic_default_station_image_64dp)
+                .into(stationImageView)
+            stationImageView.contentDescription = "${context.getString(R.string.descr_player_station_image)}: ${station.name}"
         }
-        stationImageView.contentDescription = "${context.getString(R.string.descr_player_station_image)}: ${station.name}"
 
         // update streaming link
         playerStreamingLinkView.text = station.getStreamUri()
@@ -300,14 +314,22 @@ data class MainActivityLayoutHolder (var rootView: View) : MainFragmentLayoutHol
             true -> {
                 // rotate and morph to stop icon
                 playButtonView.setImageResource(R.drawable.anim_play_to_stop_48dp)
-                val morphDrawable: AnimatedVectorDrawable = playButtonView.drawable as AnimatedVectorDrawable
-                morphDrawable.start()
+                val drawable = playButtonView.drawable
+                if (drawable is android.graphics.drawable.AnimatedVectorDrawable) {
+                    drawable.start()
+                } else if (drawable is androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat) {
+                    drawable.start()
+                }
             }
             false -> {
                 // rotate and morph to play icon
                 playButtonView.setImageResource(R.drawable.anim_stop_to_play_48dp)
-                val morphDrawable: AnimatedVectorDrawable = playButtonView.drawable as AnimatedVectorDrawable
-                morphDrawable.start()
+                val drawable = playButtonView.drawable
+                if (drawable is android.graphics.drawable.AnimatedVectorDrawable) {
+                    drawable.start()
+                } else if (drawable is androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat) {
+                    drawable.start()
+                }
             }
         }
     }

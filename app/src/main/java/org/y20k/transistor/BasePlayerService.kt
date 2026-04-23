@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.media.audiofx.AudioEffect
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -267,7 +268,12 @@ abstract class BasePlayerService: MediaLibraryService() {
             metadataStringEncoded = player.currentMediaItem?.mediaMetadata?.albumTitle.toString()
         }
         // remove HTML encoding
-        val metadataString: String = Html.fromHtml(metadataStringEncoded, Html.FROM_HTML_MODE_LEGACY).toString()
+        val metadataString: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(metadataStringEncoded, Html.FROM_HTML_MODE_LEGACY).toString()
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(metadataStringEncoded).toString()
+        }
         // remove duplicates
         if (metadataHistory.contains(metadataString)) {
             metadataHistory.removeIf { it == metadataString }

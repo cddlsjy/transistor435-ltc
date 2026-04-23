@@ -451,6 +451,11 @@ class MainFragment: Fragment(),
                     val currentStation: Station = collection.stations[PreferencesHelper.loadLastPlayedStationPosition().coerceIn(0, collection.stations.size - 1)]
                     mainActivity.updatePlayerViews(currentStation)
                     mainActivity.layout.showPlayer()
+                    // auto play last station if enabled
+                    if (PreferencesHelper.loadAutoPlayLastStation()) {
+                        val position = PreferencesHelper.loadLastPlayedStationPosition().coerceIn(0, collection.stations.size - 1)
+                        mainActivity.onPlayButtonTapped(position)
+                    }
                 } else if (mainActivity != null && collection.stations.isEmpty()) {
                     mainActivity.layout.hidePlayer()
                 }

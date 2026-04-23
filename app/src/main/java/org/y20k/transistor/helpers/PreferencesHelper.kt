@@ -337,4 +337,18 @@ object PreferencesHelper {
         return sharedPreferences.getBoolean(Keys.PREF_DOWNLOAD_OVER_MOBILE, Keys.DEFAULT_DOWNLOAD_OVER_MOBILE)
     }
 
+
+    /* Loads value of the option: Auto Play Last Station */
+    fun loadAutoPlayLastStation(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_AUTO_PLAY_LAST_STATION, false)
+    }
+
+
+    /* Saves value of the option: Auto Play Last Station */
+    fun saveAutoPlayLastStation(enabled: Boolean = false) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_AUTO_PLAY_LAST_STATION, enabled)
+        }
+    }
+
 }

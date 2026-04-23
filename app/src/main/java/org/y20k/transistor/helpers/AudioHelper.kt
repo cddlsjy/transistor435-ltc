@@ -24,6 +24,7 @@ import androidx.media3.extractor.metadata.icy.IcyHeaders
 import androidx.media3.extractor.metadata.icy.IcyInfo
 import org.y20k.transistor.Keys
 import kotlin.math.min
+import java.nio.charset.Charset
 
 
 /*
@@ -57,7 +58,7 @@ object AudioHelper {
             val entry: Metadata.Entry = metadata.get(i)
             // extract IceCast metadata
             if (entry is IcyInfo) {
-                metadataString = entry.title.toString()
+                metadataString = smartFixMetadata(entry.title.toString())
             } else if (entry is IcyHeaders) {
                 Log.i(TAG, "icyHeaders:" + entry.name + " - " + entry.genre)
             } else {
@@ -119,7 +120,64 @@ object AudioHelper {
         if (metadataString.isNotEmpty()) {
             metadataString = metadataString.substring(0, min(metadataString.length, Keys.DEFAULT_MAX_LENGTH_OF_METADATA_ENTRY))
         }
-        return metadataString
+        return smartFixMetadata(metadataString)
+    }
+
+
+    /**
+     * 智能修复 ICY 元数据编码
+     * 优先尝试 UTF-8，如果解码后无乱码且包含中文则直接使用；
+     * 否则依次尝试 UTF-8、GBK、GB18030，选择中文字符最多的结果
+     */
+    private fun smartFixMetadata(badString: String): String {
+        if (badString.isBlank()) return badString
+
+        // 将错误字符串还原为原始字节（ExoPlayer 错误地按 ISO-8859-1 读取）
+        val bytes = badString.toByteArray(Charsets.ISO_8859_1)
+
+        // 1. 优先尝试 UTF-8，并检查解码质量
+        try {
+            val utf8Decoded = String(bytes, Charsets.UTF_8)
+            if (!utf8Decoded.contains('�') && utf8Decoded.any { it in '\u4e00'..'\u9fff' }) {
+                Log.d(TAG, "UTF-8 decoding successful: $utf8Decoded")
+                return utf8Decoded
+            }
+            Log.d(TAG, "UTF-8 decoding contains replacement char or no Chinese, fallback")
+        } catch (e: Exception) {
+            Log.w(TAG, "UTF-8 decode failed", e)
+        }
+
+        // 2. 回退到多编码比较（UTF-8、GBK、GB18030）
+        val encodings = listOf(
+            Charsets.UTF_8,
+            Charset.forName("GBK"),
+            Charset.forName("GB18030")
+        )
+
+        var bestResult = badString
+        var bestChineseCount = 0
+
+        for (charset in encodings) {
+            try {
+                val decoded = String(bytes, charset)
+                val chineseCount = decoded.count { it in '\u4e00'..'\u9fff' }
+                if (chineseCount > bestChineseCount) {
+                    bestChineseCount = chineseCount
+                    bestResult = decoded
+                }
+                Log.d(TAG, "Encoding ${charset.name()}: '$decoded' (Chinese count: $chineseCount)")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to decode with ${charset.name()}", e)
+            }
+        }
+
+        if (bestChineseCount == 0 && bestResult == badString) {
+            Log.w(TAG, "No Chinese characters found, returning original: $badString")
+        } else {
+            Log.d(TAG, "Best result: '$bestResult' (Chinese count: $bestChineseCount)")
+        }
+
+        return bestResult
     }
 
 }

@@ -206,6 +206,47 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     }
 
 
+    /* Overrides dispatchKeyEvent from Activity */
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                // 处理播放/暂停按钮
+                android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
+                    onPlayButtonTapped(playerState.stationPosition)
+                    return true
+                }
+                // 处理上一个按钮
+                android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                    if (collection.stations.isNotEmpty()) {
+                        val newPosition = if (playerState.stationPosition > 0) {
+                            playerState.stationPosition - 1
+                        } else {
+                            collection.stations.size - 1
+                        }
+                        onPlayButtonTapped(newPosition)
+                    }
+                    return true
+                }
+                // 处理下一个按钮
+                android.view.KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                    if (collection.stations.isNotEmpty()) {
+                        val newPosition = if (playerState.stationPosition < collection.stations.size - 1) {
+                            playerState.stationPosition + 1
+                        } else {
+                            0
+                        }
+                        onPlayButtonTapped(newPosition)
+                    }
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+
     /* Initializes the MediaController - handles connection to PlayerService under the hood */
     private fun initializeController() {
         controllerFuture = MediaController.Builder(this, SessionToken(this, ComponentName(this, PlayerService::class.java))).buildAsync()

@@ -163,6 +163,15 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceEnableTapAnywherePlayback.summaryOff = getString(R.string.pref_tap_anywhere_playback_summary_disabled)
         preferenceEnableTapAnywherePlayback.setDefaultValue(PreferencesHelper.loadTapAnyWherePlayback())
 
+        // set up "Auto Play Last Station" preference
+        val preferenceAutoPlayLastStation: SwitchPreferenceCompat = SwitchPreferenceCompat(activity as Context)
+        preferenceAutoPlayLastStation.title = "自动播放上一次电台"
+        preferenceAutoPlayLastStation.setIcon(R.drawable.ic_play_circle_outline_24dp)
+        preferenceAutoPlayLastStation.key = Keys.PREF_AUTO_PLAY_LAST_STATION
+        preferenceAutoPlayLastStation.summaryOn = "应用启动后自动播放上次收听的电台"
+        preferenceAutoPlayLastStation.summaryOff = "应用启动后不自动播放电台"
+        preferenceAutoPlayLastStation.setDefaultValue(PreferencesHelper.loadAutoPlayLastStation())
+
         // set up "Update Station Images" preference
         val preferenceUpdateStationImages: Preference = Preference(activity as Context)
         preferenceUpdateStationImages.title = getString(R.string.pref_update_station_images_title)
@@ -279,6 +288,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceCategoryGeneral.contains(preferenceEnableDynamicColors)
         preferenceCategoryGeneral.contains(preferenceUserInterfaceTransparencyEffect)
         preferenceCategoryGeneral.contains(preferenceEnableTapAnywherePlayback)
+        preferenceCategoryGeneral.contains(preferenceAutoPlayLastStation)
 
         val preferenceCategoryMaintenance: PreferenceCategory = PreferenceCategory(activity as Context)
         preferenceCategoryMaintenance.title = getString(R.string.pref_maintenance_title)
@@ -305,6 +315,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         screen.addPreference(preferenceEnableDynamicColors)
         screen.addPreference(preferenceUserInterfaceTransparencyEffect)
         screen.addPreference(preferenceEnableTapAnywherePlayback)
+        screen.addPreference(preferenceAutoPlayLastStation)
         screen.addPreference(preferenceCategoryMaintenance)
         screen.addPreference(preferenceUpdateStationImages)
 //        screen.addPreference(preferenceUpdateCollection)
