@@ -76,6 +76,7 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     private val controller: MediaController? get() = if (controllerFuture.isDone) controllerFuture.get() else null
     private var playerState: PlayerState = PlayerState()
     private val handler: Handler = Handler(Looper.getMainLooper())
+    private var autoPlayExecuted = false
 
 
     /* Overrides onCreate from AppCompatActivity */
@@ -271,6 +272,15 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
         setupPlaybackControls()
         // update play button state
         layout.togglePlayButton(controller.isPlaying)
+
+        // 自动播放（仅一次，且仅在控制器就绪后）
+        if (!autoPlayExecuted && PreferencesHelper.loadAutoPlayLastStation()) {
+            autoPlayExecuted = true
+            val lastPosition = playerState.stationPosition
+            if (lastPosition != -1) {
+                onPlayButtonTapped(lastPosition)
+            }
+        }
     }
 
 
@@ -310,15 +320,15 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
     /* Handles play button tap */
     fun onPlayButtonTapped(stationPosition: Int) {
-        // 防止对同一 station 连续调用
+        // 如果正在播放且请求的 station 就是当前播放的 station，则暂停
         if (controller?.isPlaying == true && stationPosition == playerState.stationPosition) {
-            // 如果已经在播放，不再重复执行任何操作
-            return
+            controller?.pause()
+        } else {
+            // 否则切换到新 station 并开始播放
+            playerState.stationPosition = stationPosition
+            // start playback
+            controller?.play(this, stationPosition)
         }
-        // CASE: the selected station is not playing (another station might be playing)
-        playerState.stationPosition = stationPosition
-        // start playback
-        controller?.play(this, stationPosition)
     }
 
 
