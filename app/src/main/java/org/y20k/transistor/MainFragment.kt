@@ -127,6 +127,14 @@ class MainFragment: Fragment(),
     }
 
 
+    /* Overrides onViewCreated from Fragment */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // 只注册一次，使用 viewLifecycleOwner 确保在视图销毁时自动移除
+        observeCollectionViewModel()
+    }
+
+
     /* Overrides onSaveInstanceState from Fragment */
     override fun onSaveInstanceState(outState: Bundle) {
         if (this::layout.isInitialized) {
@@ -153,8 +161,6 @@ class MainFragment: Fragment(),
         super.onResume()
         // update station list state
         updateStationListState()
-        // begin looking for changes in collection
-        observeCollectionViewModel()
         // handle navigation arguments
         handleNavigationArguments()
         // handle start intent
@@ -431,7 +437,7 @@ class MainFragment: Fragment(),
 
     /* Observe view model of collection of stations */
     private fun observeCollectionViewModel() {
-        collectionViewModel.collectionLiveData.observe(this, Observer<Collection> { updatedCollection ->
+        collectionViewModel.collectionLiveData.observe(viewLifecycleOwner, Observer<Collection> { updatedCollection ->
                 // get BaseMainActivity instance
                 val mainActivity = activity as? BaseMainActivity
 

@@ -310,17 +310,15 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
     /* Handles play button tap */
     fun onPlayButtonTapped(stationPosition: Int) {
-        // CASE: the selected station is playing
+        // 防止对同一 station 连续调用
         if (controller?.isPlaying == true && stationPosition == playerState.stationPosition) {
-            // stop playback
-            controller?.pause()
+            // 如果已经在播放，不再重复执行任何操作
+            return
         }
         // CASE: the selected station is not playing (another station might be playing)
-        else {
-            playerState.stationPosition = stationPosition
-            // start playback
-            controller?.play(this, stationPosition)
-        }
+        playerState.stationPosition = stationPosition
+        // start playback
+        controller?.play(this, stationPosition)
     }
 
 
