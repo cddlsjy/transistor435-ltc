@@ -211,6 +211,34 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
         if (event.action == android.view.KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
+                // 处理遥控器向上键 - 切换到上一个电台并直接播放，循环跳转
+                android.view.KeyEvent.KEYCODE_DPAD_UP -> {
+                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                    if (collection.stations.isNotEmpty()) {
+                        val newPosition = if (playerState.stationPosition > 0) {
+                            playerState.stationPosition - 1
+                        } else {
+                            collection.stations.size - 1
+                        }
+                        playerState.stationPosition = newPosition
+                        onPlayButtonTapped(newPosition)
+                    }
+                    return true
+                }
+                // 处理遥控器向下键 - 切换到下一个电台并直接播放，循环跳转
+                android.view.KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                    if (collection.stations.isNotEmpty()) {
+                        val newPosition = if (playerState.stationPosition < collection.stations.size - 1) {
+                            playerState.stationPosition + 1
+                        } else {
+                            0
+                        }
+                        playerState.stationPosition = newPosition
+                        onPlayButtonTapped(newPosition)
+                    }
+                    return true
+                }
                 // 处理播放/暂停按钮
                 android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                     onPlayButtonTapped(playerState.stationPosition)
