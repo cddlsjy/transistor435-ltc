@@ -494,4 +494,12 @@ class MainFragment: Fragment(),
         }
     }
 
+
+    /* 滚动到指定电台位置 */
+    fun scrollToStationPosition(position: Int) {
+        if (position >= 0 && position < (layout.recyclerView.adapter?.itemCount ?: 0)) {
+            layout.recyclerView.smoothScrollToPosition(position)
+        }
+    }
+
 }

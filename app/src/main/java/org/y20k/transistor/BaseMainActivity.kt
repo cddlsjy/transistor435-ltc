@@ -239,6 +239,11 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                     }
                     return true
                 }
+                // 处理OK/确认键 - 切换播放/暂停
+                android.view.KeyEvent.KEYCODE_DPAD_CENTER, android.view.KeyEvent.KEYCODE_ENTER -> {
+                    onPlayButtonTapped(playerState.stationPosition)
+                    return true
+                }
                 // 处理播放/暂停按钮
                 android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                     onPlayButtonTapped(playerState.stationPosition)
@@ -273,6 +278,13 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
             }
         }
         return super.dispatchKeyEvent(event)
+    }
+
+
+    /* 获取MainFragment实例 */
+    private fun getMainFragment(): MainFragment? {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.main_host_container) as? NavHostFragment
+        return navHostFragment?.childFragmentManager?.fragments?.first() as? MainFragment
     }
 
 
@@ -356,6 +368,8 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
             playerState.stationPosition = stationPosition
             // start playback
             controller?.play(this, stationPosition)
+            // 让电台列表滚动到当前播放位置
+            getMainFragment()?.scrollToStationPosition(stationPosition)
         }
     }
 
