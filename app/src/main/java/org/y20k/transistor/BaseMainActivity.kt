@@ -220,7 +220,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                         } else {
                             collection.stations.size - 1
                         }
-                        playerState.stationPosition = newPosition
                         onPlayButtonTapped(newPosition)
                     }
                     return true
@@ -234,7 +233,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                         } else {
                             0
                         }
-                        playerState.stationPosition = newPosition
                         onPlayButtonTapped(newPosition)
                     }
                     return true
