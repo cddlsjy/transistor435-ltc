@@ -333,11 +333,13 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             if (event.action == KeyEvent.ACTION_DOWN) {
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        toggleStarredStation(context, stationViewHolder.adapterPosition)
+                        // 左键改为编辑，避免误触删除
+                        toggleEditViews(stationViewHolder.adapterPosition, station.uuid)
                         return@setOnKeyListener true
                     }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        showDeleteStationDialog(yesNoDialogListener, stationViewHolder.adapterPosition)
+                        // 右键切换星标
+                        toggleStarredStation(context, stationViewHolder.adapterPosition)
                         return@setOnKeyListener true
                     }
                     else -> return@setOnKeyListener false
