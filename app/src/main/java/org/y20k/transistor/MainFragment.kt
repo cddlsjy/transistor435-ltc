@@ -40,7 +40,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearSmoothScroller
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -443,7 +445,7 @@ class MainFragment: Fragment(),
 
                 // update collection
                 collection = updatedCollection
-                
+
                 // toggle the onboarding view if necessary and export the collection
                 layout.toggleOnboarding(collection.stations.size)
                 if (collection.stations.size > 0) {
@@ -451,12 +453,19 @@ class MainFragment: Fragment(),
                         FileHelper.backupCollectionAsM3u(requireContext(), collection)
                     }
                 }
-                
+
                 // notify the activity about the updated collection
                 if (mainActivity != null && collection.stations.isNotEmpty()) {
                     val currentStation: Station = collection.stations[PreferencesHelper.loadLastPlayedStationPosition().coerceIn(0, collection.stations.size - 1)]
                     mainActivity.updatePlayerViews(currentStation)
                     mainActivity.layout.showPlayer()
+
+                    // Initialize focus to the currently playing station
+                    val lastPlayedPosition = PreferencesHelper.loadLastPlayedStationPosition().coerceIn(0, collection.stations.size - 1)
+                    collectionAdapter.updateFocusPosition(lastPlayedPosition)
+                    layout.recyclerView.post {
+                        ensureStationVisible(lastPlayedPosition)
+                    }
                 } else if (mainActivity != null && collection.stations.isEmpty()) {
                     mainActivity.layout.hidePlayer()
                 }
@@ -501,5 +510,48 @@ class MainFragment: Fragment(),
             layout.recyclerView.smoothScrollToPosition(position)
         }
     }
+
+
+    /* Overrides onStationFocusChanged from CollectionAdapterListener */
+    override fun onStationFocusChanged(stationPosition: Int) {
+        ensureStationVisible(stationPosition)
+        layout.recyclerView.post {
+            layout.recyclerView.findViewHolderForAdapterPosition(stationPosition)?.itemView?.requestFocus()
+        }
+    }
+
+
+    /* Ensures the given station position is visible in the list */
+    private fun ensureStationVisible(position: Int) {
+        val layoutManager = layout.recyclerView.layoutManager as LinearLayoutManager
+        val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
+        val lastVisiblePosition = layoutManager.findLastVisibleItemPosition()
+
+        when {
+            position < firstVisiblePosition || position > lastVisiblePosition -> {
+                val smoothScroller = FocusSmoothScroller(requireContext())
+                smoothScroller.targetPosition = position
+                layoutManager.startSmoothScroll(smoothScroller)
+            }
+        }
+    }
+
+
+    /*
+     * Inner class: Custom smooth scroller for better focus scrolling
+     */
+    private inner class FocusSmoothScroller(context: Context) : LinearSmoothScroller(context) {
+
+        override fun getVerticalSnapPreference(): Int {
+            return SNAP_TO_START
+        }
+
+        override fun calculateSpeedPerPixel(displayMetrics: android.util.DisplayMetrics): Float {
+            return MILLISECONDS_PER_INCH / displayMetrics.densityDpi * 0.5f
+        }
+    }
+    /*
+     * End of inner class
+     */
 
 }

@@ -29,6 +29,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -81,6 +82,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
     private var editStationStreamsEnabled: Boolean = PreferencesHelper.loadEditStreamUrisEnabled()
     private var expandedStationUuid: String = PreferencesHelper.loadStationListStreamUuid()
     private var expandedStationPosition: Int = -1
+    private var currentFocusedPosition: Int = RecyclerView.NO_POSITION
 
 
     /* Listener Interface */
@@ -89,6 +91,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
         fun onAddNewButtonTapped()
         fun onChangeImageButtonTapped(stationUuid: String)
         fun onStationCardTapped()
+        fun onStationFocusChanged(stationPosition: Int)
     }
 
 
@@ -160,6 +163,7 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
                 setStationImage(stationViewHolder, station, position)
                 setStationButtons(stationViewHolder, station)
                 setEditViews(stationViewHolder, station)
+                setFocusHighlight(stationViewHolder, station, position)
 
                 // show / hide edit views
                 when (expandedStationPosition) {
@@ -333,13 +337,32 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             if (event.action == KeyEvent.ACTION_DOWN) {
                 when (keyCode) {
                     KeyEvent.KEYCODE_DPAD_LEFT -> {
-                        // 左键改为编辑，避免误触删除
                         toggleEditViews(stationViewHolder.adapterPosition, station.uuid)
                         return@setOnKeyListener true
                     }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                        // 右键切换星标
                         toggleStarredStation(context, stationViewHolder.adapterPosition)
+                        return@setOnKeyListener true
+                    }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        val newPosition = stationViewHolder.adapterPosition - 1
+                        if (newPosition >= 0) {
+                            updateFocusPosition(newPosition)
+                            collectionAdapterListener.onStationFocusChanged(newPosition)
+                        }
+                        return@setOnKeyListener true
+                    }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        val newPosition = stationViewHolder.adapterPosition + 1
+                        if (newPosition < collection.stations.size) {
+                            updateFocusPosition(newPosition)
+                            collectionAdapterListener.onStationFocusChanged(newPosition)
+                        }
+                        return@setOnKeyListener true
+                    }
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_ENTER -> {
+                        collectionAdapterListener.onPlayButtonTapped(stationViewHolder.adapterPosition)
                         return@setOnKeyListener true
                     }
                     else -> return@setOnKeyListener false
@@ -347,6 +370,58 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
             } else return@setOnKeyListener false
         }
     }
+
+
+    /* Sets focus highlight for station card */
+    private fun setFocusHighlight(stationViewHolder: StationViewHolder, station: Station, position: Int) {
+        val isFocused = position == currentFocusedPosition
+        val isPlaying = station.isPlaying
+
+        when {
+            isPlaying -> {
+                stationViewHolder.stationCardView.setBackgroundColor(
+                    ContextCompat.getColor(context, R.color.md_theme_primary)
+                )
+                stationViewHolder.stationNameView.setTextColor(
+                    ContextCompat.getColor(context, R.color.md_theme_onPrimary)
+                )
+            }
+            isFocused && !isPlaying -> {
+                stationViewHolder.stationCardView.setBackgroundColor(
+                    ContextCompat.getColor(context, R.color.focus_highlight_light)
+                )
+                stationViewHolder.stationNameView.setTextColor(
+                    ContextCompat.getColor(context, R.color.default_text_color)
+                )
+            }
+            else -> {
+                stationViewHolder.stationCardView.setBackgroundColor(
+                    ContextCompat.getColor(context, R.color.md_theme_surface)
+                )
+                stationViewHolder.stationNameView.setTextColor(
+                    ContextCompat.getColor(context, R.color.default_text_color)
+                )
+            }
+        }
+    }
+
+
+    /* Updates focus position and notifies adapter */
+    fun updateFocusPosition(position: Int) {
+        val previousPosition = currentFocusedPosition
+        currentFocusedPosition = position
+
+        if (previousPosition != RecyclerView.NO_POSITION) {
+            notifyItemChanged(previousPosition)
+        }
+        if (currentFocusedPosition != RecyclerView.NO_POSITION) {
+            notifyItemChanged(currentFocusedPosition)
+        }
+    }
+
+
+    /* Gets current focused position */
+    fun getCurrentFocusedPosition(): Int = currentFocusedPosition
 
 
     /* Checks if stream uri input is valid - a bit hacky: attach the detected content type as a tag to the save button */
