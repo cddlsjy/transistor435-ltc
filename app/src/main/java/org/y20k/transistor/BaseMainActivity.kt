@@ -463,7 +463,9 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /*
      * Player.Listener: Called when one or more player states changed.
      */
-    private var playerListener: Player.Listener = object : Player.Listener {
+     private var playerListener: Player.Listener = object : Player.Listener {
+
+        private var wasPlayingBefore = false
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
@@ -473,6 +475,12 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
             layout.animatePlaybackButtonStateTransition(this@BaseMainActivity, isPlaying)
             // toggle the sleep timer update subscription
             togglePeriodicSleepTimerUpdateRequest()
+
+            // 当从停止/暂停恢复播放时，请求更新 metadata
+            if (isPlaying && !wasPlayingBefore) {
+                requestMetadataUpdate()
+            }
+            wasPlayingBefore = isPlaying
 
             if (isPlaying) {
                 // playback is active
