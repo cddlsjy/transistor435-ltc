@@ -379,11 +379,12 @@ class CollectionAdapter(private val context: Context, private val collectionAdap
 
         when {
             isPlaying -> {
+                // 使用与播放控制条相同的淡蓝色
                 stationViewHolder.stationCardView.setBackgroundColor(
-                    ContextCompat.getColor(context, R.color.md_theme_primary)
+                    ContextCompat.getColor(context, R.color.md_theme_primaryContainer)
                 )
                 stationViewHolder.stationNameView.setTextColor(
-                    ContextCompat.getColor(context, R.color.md_theme_onPrimary)
+                    ContextCompat.getColor(context, R.color.md_theme_onPrimaryContainer)
                 )
             }
             isFocused && !isPlaying -> {

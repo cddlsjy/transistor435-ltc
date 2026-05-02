@@ -7,8 +7,8 @@
     <color name="default_text_color">#191C20</color>
 
     <!-- focus highlight colors -->
-    <color name="focus_highlight_light">#E3F2FD</color>
-    <color name="focus_highlight_dark">#1A237E</color>
+    <color name="focus_highlight_light">#D6E3FF</color>
+    <color name="focus_highlight_dark">#264777</color>
 
     <!-- color palette created via https://material-foundation.github.io/material-theme-builder/-->
     <color name="md_theme_primary">#405F90</color>
