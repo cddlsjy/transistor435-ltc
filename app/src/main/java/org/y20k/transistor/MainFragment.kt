@@ -17,6 +17,7 @@ package org.y20k.transistor
 import android.Manifest
 import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -547,7 +548,8 @@ class MainFragment: Fragment(),
         }
 
         override fun calculateSpeedPerPixel(displayMetrics: android.util.DisplayMetrics): Float {
-            return MILLISECONDS_PER_INCH / displayMetrics.densityDpi * 0.5f
+            // 使用常数替代私有的 MILLISECONDS_PER_INCH
+            return 25.0f / displayMetrics.densityDpi * 0.5f
         }
     }
     /*
