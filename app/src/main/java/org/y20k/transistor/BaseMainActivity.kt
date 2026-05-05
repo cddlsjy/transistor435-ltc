@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -34,6 +35,7 @@ import androidx.media3.session.SessionToken
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.CoroutineScope
@@ -62,7 +64,10 @@ import org.y20k.transistor.ui.PlayerState
 /*
  * BaseMainActivity class
  */
-abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class BaseMainActivity : AppCompatActivity(), 
+    SharedPreferences.OnSharedPreferenceChangeListener,
+    PlayerSmallFragment.PlayerSmallFragmentListener,
+    PlayerFullFragment.PlayerFullFragmentListener {
 
 
     /* Define log tag */
@@ -77,6 +82,10 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     private var playerState: PlayerState = PlayerState()
     private val handler: Handler = Handler(Looper.getMainLooper())
     private var autoPlayExecuted = false
+    
+    // Fullscreen mode related
+    private var isFullscreenMode = false
+    private var fullPlayerFragment: PlayerFullFragment? = null
 
 
     /* Overrides onCreate from AppCompatActivity */
@@ -86,30 +95,26 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
         // house keeping - if necessary
         if (PreferencesHelper.isHouseKeepingNecessary()) {
-            // house-keeping 1: remove hard coded default image
             ImportHelper.removeDefaultStationImageUris(this)
-            // house-keeping 2: if existing user detected, enable Edit Stations by default
             if (PreferencesHelper.loadCollectionSize() != -1) {
-                // existing user detected - enable Edit Stations by default
                 PreferencesHelper.saveEditStationsEnabled(true)
             }
             PreferencesHelper.saveHouseKeepingNecessaryState()
         }
 
-        // set up views
         setContentView(R.layout.activity_main)
         layout = MainActivityLayoutHolder(findViewById(R.id.root_view))
 
-        // load player state
         playerState = PreferencesHelper.loadPlayerState()
 
-        // create .nomedia file - if not yet existing
         FileHelper.createNomediaFile(getExternalFilesDir(null))
 
         // custom back press handling
-        val onBackPressedCallback = object : OnBackPressedCallback(true /* enabled by default */) {
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (!layout.hidePlayerExtendedViewsIfVisible()) {
+                if (isFullscreenMode) {
+                    exitFullscreenMode()
+                } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
                 }
@@ -117,11 +122,8 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
         }
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-
-        // set up playback controls
         setupPlaybackControls()
 
-        // register listener for changes in shared preferences
         PreferencesHelper.registerPreferenceChangeListener(this)
     }
 
@@ -129,7 +131,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /* Overrides onStart from AppCompatActivity */
     override fun onStart() {
         super.onStart()
-        // initialize MediaController - connect to PlayerService
         initializeController()
     }
 
@@ -137,28 +138,15 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /* Overrides onResume from AppCompatActivity */
     override fun onResume() {
         super.onResume()
-        // assign volume buttons to music volume
         volumeControlStream = AudioManager.STREAM_MUSIC
-        // load player state
         playerState = PreferencesHelper.loadPlayerState()
-        // toggle periodic sleep timer update request
         togglePeriodicSleepTimerUpdateRequest()
-//
-//        // Update player views with current station data after activity recreation
-//        if (playerState.stationPosition >= 0) {
-//            val collection = FileHelper.readCollection(this)
-//            if (collection.stations.isNotEmpty() && playerState.stationPosition < collection.stations.size) {
-//                val currentStation = collection.stations[playerState.stationPosition]
-//                updatePlayerViews(currentStation)
-//            }
-//        }
     }
 
 
     /* Overrides onPause from AppCompatActivity */
     override fun onPause() {
         super.onPause()
-        // stop receiving playback progress updates
         handler.removeCallbacks(periodicSleepTimerUpdateRequestRunnable)
     }
 
@@ -166,7 +154,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /* Overrides onStop from AppCompatActivity */
     override fun onStop() {
         super.onStop()
-        // release MediaController - cut connection to PlayerService
         releaseController()
     }
 
@@ -174,7 +161,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /* Overrides onDestroy from AppCompatActivity */
     override fun onDestroy() {
         super.onDestroy()
-        // unregister listener for changes in shared preferences
         PreferencesHelper.unregisterPreferenceChangeListener(this)
     }
 
@@ -200,7 +186,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
     /* Overrides onSupportNavigateUp from AppCompatActivity */
     override fun onSupportNavigateUp(): Boolean {
-        // taken from: https://developer.android.com/guide/navigation/navigation-ui#action_bar
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.main_host_container) as NavHostFragment
         val navController = navHostFragment.navController
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
@@ -211,43 +196,48 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
         if (event.action == android.view.KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
-                // 处理遥控器向上键 - 切换到上一个电台并直接播放，循环跳转
                 android.view.KeyEvent.KEYCODE_DPAD_UP -> {
-                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
-                    if (collection.stations.isNotEmpty()) {
-                        val newPosition = if (playerState.stationPosition > 0) {
-                            playerState.stationPosition - 1
-                        } else {
-                            collection.stations.size - 1
+                    if (isFullscreenMode) {
+                        onPreviousButtonTapped()
+                    } else {
+                        val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                        if (collection.stations.isNotEmpty()) {
+                            val newPosition = if (playerState.stationPosition > 0) {
+                                playerState.stationPosition - 1
+                            } else {
+                                collection.stations.size - 1
+                            }
+                            onPlayButtonTapped(newPosition)
                         }
-                        onPlayButtonTapped(newPosition)
                     }
                     return true
                 }
-                // 处理遥控器向下键 - 切换到下一个电台并直接播放，循环跳转
                 android.view.KeyEvent.KEYCODE_DPAD_DOWN -> {
-                    val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
-                    if (collection.stations.isNotEmpty()) {
-                        val newPosition = if (playerState.stationPosition < collection.stations.size - 1) {
-                            playerState.stationPosition + 1
-                        } else {
-                            0
+                    if (isFullscreenMode) {
+                        onNextButtonTapped()
+                    } else {
+                        val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+                        if (collection.stations.isNotEmpty()) {
+                            val newPosition = if (playerState.stationPosition < collection.stations.size - 1) {
+                                playerState.stationPosition + 1
+                            } else {
+                                0
+                            }
+                            onPlayButtonTapped(newPosition)
                         }
-                        onPlayButtonTapped(newPosition)
                     }
                     return true
                 }
-                // 处理OK/确认键 - 切换播放/暂停
                 android.view.KeyEvent.KEYCODE_DPAD_CENTER, android.view.KeyEvent.KEYCODE_ENTER -> {
-                    onPlayButtonTapped(playerState.stationPosition)
+                    if (!isFullscreenMode) {
+                        enterFullscreenMode()
+                    }
                     return true
                 }
-                // 处理播放/暂停按钮
                 android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
                     onPlayButtonTapped(playerState.stationPosition)
                     return true
                 }
-                // 处理上一个按钮
                 android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                     val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
                     if (collection.stations.isNotEmpty()) {
@@ -260,7 +250,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                     }
                     return true
                 }
-                // 处理下一个按钮
                 android.view.KeyEvent.KEYCODE_MEDIA_NEXT -> {
                     val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
                     if (collection.stations.isNotEmpty()) {
@@ -286,6 +275,94 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     }
 
 
+    /* Implements PlayerSmallFragmentListener - Toggle play/pause and PlayerFullFragmentListener - Toggle play/pause */
+    override fun onPlayButtonTapped() {
+        onPlayButtonTapped(playerState.stationPosition)
+    }
+
+
+    /* Implements PlayerSmallFragmentListener - Toggle bottom sheet */
+    override fun onPlayerTapped() {
+        enterFullscreenMode()
+    }
+
+
+    /* Implements PlayerFullFragmentListener - Switch to previous station */
+    override fun onPreviousButtonTapped() {
+        val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+        if (collection.stations.isNotEmpty()) {
+            val newPosition = if (playerState.stationPosition > 0) {
+                playerState.stationPosition - 1
+            } else {
+                collection.stations.size - 1
+            }
+            onPlayButtonTapped(newPosition)
+        }
+    }
+
+
+    /* Implements PlayerFullFragmentListener - Switch to next station */
+    override fun onNextButtonTapped() {
+        val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+        if (collection.stations.isNotEmpty()) {
+            val newPosition = if (playerState.stationPosition < collection.stations.size - 1) {
+                playerState.stationPosition + 1
+            } else {
+                0
+            }
+            onPlayButtonTapped(newPosition)
+        }
+    }
+
+
+    /* Implements PlayerFullFragmentListener - Exit fullscreen */
+    override fun onExitFullscreen() {
+        exitFullscreenMode()
+    }
+
+
+    /* Enter fullscreen mode */
+    private fun enterFullscreenMode() {
+        if (isFullscreenMode) return
+
+        isFullscreenMode = true
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this@BaseMainActivity)
+        fullPlayerFragment = PlayerFullFragment().apply {
+            if (collection.stations.isNotEmpty() && playerState.stationPosition >= 0 && playerState.stationPosition < collection.stations.size) {
+                setInitialData(collection.stations[playerState.stationPosition], playerState.isPlaying)
+            }
+        }
+
+        val fullscreenContainer = findViewById<View>(R.id.fullscreen_player_container)
+        fullscreenContainer.visibility = View.VISIBLE
+
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fullscreen_player_container, fullPlayerFragment!!)
+            .commit()
+    }
+
+
+    /* Exit fullscreen mode */
+    private fun exitFullscreenMode() {
+        if (!isFullscreenMode) return
+
+        isFullscreenMode = false
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        fullPlayerFragment?.let { fragment ->
+            supportFragmentManager.beginTransaction()
+                .remove(fragment)
+                .commit()
+        }
+        fullPlayerFragment = null
+
+        val fullscreenContainer = findViewById<View>(R.id.fullscreen_player_container)
+        fullscreenContainer.visibility = View.GONE
+    }
+
+
     /* Initializes the MediaController - handles connection to PlayerService under the hood */
     private fun initializeController() {
         controllerFuture = MediaController.Builder(this, SessionToken(this, ComponentName(this, PlayerService::class.java))).buildAsync()
@@ -304,14 +381,10 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
         val controller: MediaController = this.controller ?: return
         controller.addListener(playerListener)
         requestMetadataUpdate()
-        // handle start intent
         handleStartIntent()
-        // wire up the playback controls
         setupPlaybackControls()
-        // update play button state
         layout.togglePlayButton(controller.isPlaying)
 
-        // 自动播放（仅一次，且仅在控制器就绪后）
         if (!autoPlayExecuted && PreferencesHelper.loadAutoPlayLastStation()) {
             autoPlayExecuted = true
             val lastPosition = playerState.stationPosition
@@ -319,17 +392,21 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                 onPlayButtonTapped(lastPosition)
             }
         }
+
+        if (PreferencesHelper.loadAutoFullScreenPlayback() && playerState.stationPosition >= 0) {
+            handler.postDelayed({
+                enterFullscreenMode()
+            }, 300)
+        }
     }
 
 
     /* Sets up the general playback controls */
     private fun setupPlaybackControls() {
-        // main play/pause button
         layout.playButtonView.setOnClickListener {
             onPlayButtonTapped(playerState.stationPosition)
         }
 
-        // set up sleep timer start button
         layout.playerSleepTimerStartButtonView.setOnClickListener {
             when (controller?.isPlaying) {
                 true -> {
@@ -337,7 +414,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
                     controller?.startSleepTimer()
                     togglePeriodicSleepTimerUpdateRequest()
                 }
-
                 else -> Toast.makeText(
                     this,
                     R.string.toast_message_sleep_timer_unable_to_start,
@@ -346,7 +422,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
             }
         }
 
-        // set up sleep timer cancel button
         layout.playerSleepTimerCancelButtonView.setOnClickListener {
             layout.sheetSleepTimerRemainingTimeView.text = String()
             playerState.sleepTimerRunning = false
@@ -358,15 +433,11 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
     /* Handles play button tap */
     fun onPlayButtonTapped(stationPosition: Int) {
-        // 如果正在播放且请求的 station 就是当前播放的 station，则暂停
         if (controller?.isPlaying == true && stationPosition == playerState.stationPosition) {
             controller?.pause()
         } else {
-            // 否则切换到新 station 并开始播放
             playerState.stationPosition = stationPosition
-            // start playback
             controller?.play(this, stationPosition)
-            // 让电台列表滚动到当前播放位置
             getMainFragment()?.scrollToStationPosition(stationPosition)
         }
     }
@@ -375,6 +446,7 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
     /* Updates the player views */
     fun updatePlayerViews(station: Station) {
         layout.updatePlayerViews(this, station, playerState.isPlaying)
+        fullPlayerFragment?.updatePlayerViews(this, station, playerState.isPlaying)
     }
 
 
@@ -395,6 +467,9 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
         resultFuture?.addListener(kotlinx.coroutines.Runnable {
             val metadata: ArrayList<String>? = resultFuture.get().extras.getStringArrayList(Keys.EXTRA_METADATA_HISTORY)
             layout.updateMetadata(metadata?.toMutableList())
+            if (!metadata.isNullOrEmpty()) {
+                fullPlayerFragment?.updateMetadata(metadata.last())
+            }
         }, MoreExecutors.directExecutor())
     }
 
@@ -416,7 +491,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
         if (intent.action != null) {
             when (intent.action) {
                 Keys.ACTION_START -> handleStartPlayer()
-                // Intent.ACTION_VIEW and Intent.ACTION_SEND are handled in MainFragment
             }
         }
     }
@@ -424,9 +498,7 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
     /* Handles START_PLAYER_SERVICE request from App Shortcut */
     private fun handleStartPlayer() {
-        // clear intent action to prevent double calls
         intent.action = ""
-        // get intent extra
         if (intent.hasExtra(Keys.EXTRA_START_LAST_PLAYED_STATION)) {
             controller?.play(this, playerState.stationPosition)
         } else if (intent.hasExtra(Keys.EXTRA_STATION_UUID)) {
@@ -449,9 +521,7 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
      */
     private val periodicSleepTimerUpdateRequestRunnable: Runnable = object : Runnable {
         override fun run() {
-            // update sleep timer view
             requestSleepTimerUpdate()
-            // use the handler to start runnable again after specified delay
             handler.postDelayed(this, 500)
         }
     }
@@ -467,28 +537,28 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
-            // store state of playback
             playerState.isPlaying = isPlaying
-            // animate state transition of play button(s)
             layout.animatePlaybackButtonStateTransition(this@BaseMainActivity, isPlaying)
-            // toggle the sleep timer update subscription
             togglePeriodicSleepTimerUpdateRequest()
 
             if (isPlaying) {
-                // playback is active
                 layout.showPlayer()
                 layout.showBufferingIndicator(buffering = false)
             } else {
-                // playback is not active
                 layout.updateSleepTimer(this@BaseMainActivity)
             }
 
-            // update the sleep timer running state
             val resultFuture: ListenableFuture<SessionResult>? =
                 controller?.requestSleepTimerRunning()
             resultFuture?.addListener(kotlinx.coroutines.Runnable {
                 playerState.sleepTimerRunning = resultFuture.get().extras.getBoolean(Keys.EXTRA_SLEEP_TIMER_RUNNING, false)
             }, MoreExecutors.directExecutor())
+            
+            val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this@BaseMainActivity)
+            if (collection.stations.isNotEmpty() && playerState.stationPosition >= 0 && playerState.stationPosition < collection.stations.size) {
+                val station = collection.stations[playerState.stationPosition]
+                fullPlayerFragment?.updatePlayerViews(this@BaseMainActivity, station, isPlaying)
+            }
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
@@ -503,7 +573,6 @@ abstract class BaseMainActivity : AppCompatActivity(), SharedPreferences.OnShare
             super.onPlayerError(error)
             layout.togglePlayButton(false)
             layout.showBufferingIndicator(false)
-            // TODO: display Toast error message
         }
     }
     /*

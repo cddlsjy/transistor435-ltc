@@ -172,6 +172,15 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceAutoPlayLastStation.summaryOff = "应用启动后不自动播放电台"
         preferenceAutoPlayLastStation.setDefaultValue(PreferencesHelper.loadAutoPlayLastStation())
 
+        // set up "Auto Full Screen Playback" preference
+        val preferenceAutoFullScreenPlayback: SwitchPreferenceCompat = SwitchPreferenceCompat(activity as Context)
+        preferenceAutoFullScreenPlayback.title = "启动时自动全屏播放"
+        preferenceAutoFullScreenPlayback.setIcon(R.drawable.ic_play_circle_outline_24dp)
+        preferenceAutoFullScreenPlayback.key = Keys.PREF_AUTO_FULL_SCREEN_PLAYBACK
+        preferenceAutoFullScreenPlayback.summaryOn = "应用启动后自动展开播放器到全屏"
+        preferenceAutoFullScreenPlayback.summaryOff = "应用启动后播放器保持最小化状态"
+        preferenceAutoFullScreenPlayback.setDefaultValue(PreferencesHelper.loadAutoFullScreenPlayback())
+
         // set up "Update Station Images" preference
         val preferenceUpdateStationImages: Preference = Preference(activity as Context)
         preferenceUpdateStationImages.title = getString(R.string.pref_update_station_images_title)
@@ -289,6 +298,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceCategoryGeneral.contains(preferenceUserInterfaceTransparencyEffect)
         preferenceCategoryGeneral.contains(preferenceEnableTapAnywherePlayback)
         preferenceCategoryGeneral.contains(preferenceAutoPlayLastStation)
+        preferenceCategoryGeneral.contains(preferenceAutoFullScreenPlayback)
 
         val preferenceCategoryMaintenance: PreferenceCategory = PreferenceCategory(activity as Context)
         preferenceCategoryMaintenance.title = getString(R.string.pref_maintenance_title)
@@ -316,6 +326,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         screen.addPreference(preferenceUserInterfaceTransparencyEffect)
         screen.addPreference(preferenceEnableTapAnywherePlayback)
         screen.addPreference(preferenceAutoPlayLastStation)
+        screen.addPreference(preferenceAutoFullScreenPlayback)
         screen.addPreference(preferenceCategoryMaintenance)
         screen.addPreference(preferenceUpdateStationImages)
 //        screen.addPreference(preferenceUpdateCollection)

@@ -1,0 +1,76 @@
+们看到了崩溃日志。最初（16:42左右）是 NullPointerException 在 MainActivityLayoutHolder.<init> 第120行，因为某个 ImageButton 为 null。之后（16:53左右），变成了 ClassCastException: CoordinatorLayout$LayoutParams cannot be cast to FrameLayout$LayoutParams 在 setupEdgeToEdge 第495行。
+
+用户之前尝试了某些修改（可能添加了player_card视图或其他更改），导致了新的崩溃。现在我们需要分析并提供解决方案。
+
+首先，回顾一下之前的建议：1. 在activity_main.xml中include card_player，2. 创建全屏容器并修改全屏进入退出逻辑。但用户可能没有正确实施，或者遇到了其他问题。从新的崩溃 ClassCastException 看，setupEdgeToEdge 方法中将某个 CoordinatorLayout.LayoutParams 强制转换为 FrameLayout.LayoutParams，可能是因为某些视图不在 CoordinatorLayout 内，或者布局嵌套导致参数类型错误。
+
+setupEdgeToEdge 在 MainActivityLayoutHolder.kt 中，它设置了 downloadProgressIndicator 和 playerCardView 的边距。downloadProgressIndicator 是在 activity_main.xml 中的 LinearProgressIndicator，它直接位于 CoordinatorLayout 下，所以 layoutParams 是 CoordinatorLayout.LayoutParams，可以转换为 FrameLayout.LayoutParams？实际上 CoordinatorLayout.LayoutParams 继承自 ViewGroup.MarginLayoutParams，而 FrameLayout.LayoutParams 也继承自 ViewGroup.MarginLayoutParams，但它们没有直接关系。将 CoordinatorLayout.LayoutParams 强转为 FrameLayout.LayoutParams 会抛出 ClassCastException。原本代码中应该是使用 updateLayoutParams<FrameLayout.LayoutParams>，但如果视图在 CoordinatorLayout 中，其 layoutParams 实际上是 CoordinatorLayout.LayoutParams，不能直接转成 FrameLayout.LayoutParams。需要改为 CoordinatorLayout.LayoutParams 或使用 updateLayoutParams<CoordinatorLayout.LayoutParams>。同样，playerCardView 如果被 include 进来，它的父容器是 CoordinatorLayout，其 layoutParams 也是 CoordinatorLayout.LayoutParams，不能转为 FrameLayout.LayoutParams。
+
+在原始代码中，activity_main.xml 里原来就有 playerCardView 吗？查看提供的初始文件，activity_main.xml 中只有 FragmentContainerView 和 download_progress_indicator，没有 player_card。所以 MainActivityLayoutHolder 初始化时 playerCardView 会是 null，导致之前的 NPE。我们建议 include card_player，然后 playerCardView 就不再 null 了，但它的 layoutParams 类型变成了 CoordinatorLayout.LayoutParams（因为父布局是 CoordinatorLayout）。因此 setupEdgeToEdge 中的 playerCardView.updateLayoutParams<FrameLayout.LayoutParams> 就会报错。
+
+所以我们需要修改 MainActivityLayoutHolder.kt 中的 setupEdgeToEdge 方法，将 FrameLayout.LayoutParams 改为 CoordinatorLayout.LayoutParams。同时也要确保 downloadProgressIndicator 的 layoutParams 也是 CoordinatorLayout.LayoutParams。
+
+另外，之前 NPE 的问题可能因为 include 了 card_player 而解决。但闪退依然存在，现在是强制转换错误。因此同时需要修改类型转换。
+
+另外，全屏模式的实现建议也可能会导致其他问题，但当前崩溃主要是布局参数转换错误，所以先修复这个。
+
+总结原因：
+
+在 activity_main.xml 中 include card_player 后，playerCardView 不为 null，但它的 layoutParams 是 CoordinatorLayout.LayoutParams，而 setupEdgeToEdge 中错误地使用了 updateLayoutParams<FrameLayout.LayoutParams>，导致 ClassCastException。
+
+修复方法：将 setupEdgeToEdge 中对 downloadProgressIndicator 和 playerCardView 的 updateLayoutParams 调用改为使用 CoordinatorLayout.LayoutParams，因为两者都是 CoordinatorLayout 的直接子视图。
+
+还需注意 downloadProgressIndicator 原来可能就在 CoordinatorLayout 中，它的 layoutParams 也是 CoordinatorLayout.LayoutParams，所以也要改。
+
+查看 MainActivityLayoutHolder.kt 的 setupEdgeToEdge 方法（第 495 行附近）：
+
+kotlin
+downloadProgressIndicator.updateLayoutParams<FrameLayout.LayoutParams> {
+    topMargin = systemBars.top
+}
+playerCardView.updateLayoutParams<FrameLayout.LayoutParams> {
+    bottomMargin = (Keys.PLAYER_BOTTOM_MARGIN * UiHelper.getDensityScalingFactor(rootView.context)).toInt() + systemBars.bottom
+}
+应改为：
+
+kotlin
+downloadProgressIndicator.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+    topMargin = systemBars.top
+}
+playerCardView.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+    bottomMargin = (Keys.PLAYER_BOTTOM_MARGIN * UiHelper.getDensityScalingFactor(rootView.context)).toInt() + systemBars.bottom
+}
+因为 updateLayoutParams 需要一个具体类型，并可以修改其边距等。
+
+此外，全屏实现也需要按之前建议的用覆盖容器方式，但当前崩溃不是全屏触发的，而是 activity 创建时。所以先解决这个强制转换问题，应用才能启动。
+
+现在给用户答复，指出错误原因并提供修改方案。注意语气要帮助解决问题，并解释为什么会出现这个错误。
+
+从崩溃日志看，你的应用现在卡在了 MainActivityLayoutHolder 初始化阶段，一启动就闪退。原因是你已经按照之前的建议把 card_player 包含进了 activity_main.xml，这解决了 playerCardView 为 null 的问题。但新问题来了：activity_main.xml 的根布局是 CoordinatorLayout，所以包含进去的 player_card（以及原有的 download_progress_indicator）的 LayoutParams 实际上是 CoordinatorLayout.LayoutParams，而 MainActivityLayoutHolder.kt 的 setupEdgeToEdge 方法里却错误地将它们当成 FrameLayout.LayoutParams 进行强制转换，于是立刻抛出 ClassCastException。
+
+你需要修改 MainActivityLayoutHolder.kt 中的 setupEdgeToEdge 方法，将布局参数类型改为正确的 CoordinatorLayout.LayoutParams。具体修改如下：
+
+找到 MainActivityLayoutHolder.kt 第 490 行附近的这段代码：
+
+kotlin
+downloadProgressIndicator.updateLayoutParams<FrameLayout.LayoutParams> {
+    topMargin = systemBars.top
+}
+playerCardView.updateLayoutParams<FrameLayout.LayoutParams> {
+    bottomMargin = (Keys.PLAYER_BOTTOM_MARGIN * UiHelper.getDensityScalingFactor(rootView.context)).toInt() + systemBars.bottom
+}
+替换为：
+
+kotlin
+downloadProgressIndicator.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+    topMargin = systemBars.top
+}
+playerCardView.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+    bottomMargin = (Keys.PLAYER_BOTTOM_MARGIN * UiHelper.getDensityScalingFactor(rootView.context)).toInt() + systemBars.bottom
+}
+因为 downloadProgressIndicator 和 playerCardView 都是 CoordinatorLayout 的直接子 View，它们的 layoutParams 就是 CoordinatorLayout.LayoutParams，这样才能安全地设置边距。
+
+另外，关于全屏闪退的问题，之前的 replace(R.id.main_host_container) 方案确实会破坏导航组件，建议你照我前一次回复的方案改：在 activity_main.xml 中添加一个隐藏的 FrameLayout 作为全屏容器，进入全屏时隐藏 NavHostFragment，显示全屏容器并添加 PlayerFullFragment。但即便你还没改全屏代码，现在这个 ClassCastException 是启动必现的，先修复它才能进应用。
+
+如果仍有其他崩溃，请提供新的日志。
+

@@ -351,4 +351,18 @@ object PreferencesHelper {
         }
     }
 
+
+    /* Loads value of the option: Auto Full Screen Playback */
+    fun loadAutoFullScreenPlayback(): Boolean {
+        return sharedPreferences.getBoolean(Keys.PREF_AUTO_FULL_SCREEN_PLAYBACK, false)
+    }
+
+
+    /* Saves value of the option: Auto Full Screen Playback */
+    fun saveAutoFullScreenPlayback(enabled: Boolean = false) {
+        sharedPreferences.edit {
+            putBoolean(Keys.PREF_AUTO_FULL_SCREEN_PLAYBACK, enabled)
+        }
+    }
+
 }

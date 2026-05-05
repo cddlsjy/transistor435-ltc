@@ -23,6 +23,7 @@ import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.View
 import android.widget.FrameLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -441,7 +442,7 @@ data class MainActivityLayoutHolder (var rootView: View) : MainFragmentLayoutHol
             // get measurements for status and navigation bar
             systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             // apply measurements
-            downloadProgressIndicator.updateLayoutParams<FrameLayout.LayoutParams> {
+            downloadProgressIndicator.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                 topMargin = systemBars.top
             }
             playerCardView.updateLayoutParams<FrameLayout.LayoutParams> {

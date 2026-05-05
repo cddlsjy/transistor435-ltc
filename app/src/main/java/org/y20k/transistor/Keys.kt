@@ -107,6 +107,7 @@ object Keys {
     const val PREF_EDIT_STATIONS: String = "EDIT_STATIONS"
     const val PREF_EDIT_STREAMS_URIS: String = "EDIT_STREAMS_URIS"
     const val PREF_AUTO_PLAY_LAST_STATION: String = "AUTO_PLAY_LAST_STATION"
+    const val PREF_AUTO_FULL_SCREEN_PLAYBACK: String = "AUTO_FULL_SCREEN_PLAYBACK"
 
 
     // states
