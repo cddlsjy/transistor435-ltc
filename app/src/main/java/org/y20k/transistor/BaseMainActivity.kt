@@ -104,6 +104,11 @@ abstract class BaseMainActivity : AppCompatActivity(),
 
         setContentView(R.layout.activity_main)
         layout = MainActivityLayoutHolder(findViewById(R.id.root_view))
+        layout.playerCardClickListener = object : MainActivityLayoutHolder.PlayerCardClickListener {
+            override fun onPlayerCardClicked() {
+                enterFullscreenMode()
+            }
+        }
 
         playerState = PreferencesHelper.loadPlayerState()
 

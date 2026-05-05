@@ -56,6 +56,12 @@ import java.io.File
  */
 data class MainActivityLayoutHolder (var rootView: View) : MainFragmentLayoutHolder.StationListDragListener, SettingsFragment.SettingsListDragListener {
 
+    interface PlayerCardClickListener {
+        fun onPlayerCardClicked()
+    }
+
+    var playerCardClickListener: PlayerCardClickListener? = null
+
     /* Define log tag */
     private val TAG: String = MainActivityLayoutHolder::class.java.simpleName
 
@@ -406,10 +412,10 @@ data class MainActivityLayoutHolder (var rootView: View) : MainFragmentLayoutHol
 
     /* Sets up the player */
     private fun setupPlayer() {
-        playerCardView.setOnClickListener { togglePlayerExtendedViews() }
-        stationImageView.setOnClickListener { togglePlayerExtendedViews() }
-        stationNameView.setOnClickListener { togglePlayerExtendedViews() }
-        metadataView.setOnClickListener { togglePlayerExtendedViews() }
+        playerCardView.setOnClickListener { playerCardClickListener?.onPlayerCardClicked() }
+        stationImageView.setOnClickListener { playerCardClickListener?.onPlayerCardClicked() }
+        stationNameView.setOnClickListener { playerCardClickListener?.onPlayerCardClicked() }
+        metadataView.setOnClickListener { playerCardClickListener?.onPlayerCardClicked() }
     }
 
 
