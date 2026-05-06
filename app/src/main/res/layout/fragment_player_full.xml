@@ -1,105 +1,199 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/player_card"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:cardCornerRadius="0dp"
-    app:cardElevation="0dp">
+    android:background="?attr/colorSurface"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <View
+        android:id="@+id/dividerTop"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerVertical" />
 
-        <ImageButton
-            android:id="@+id/button_fullscreen_exit"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="end"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/descr_expanded_player_exit_fullscreen"
-            android:padding="8dp"
-            app:srcCompat="@drawable/ic_player_extended_chevron_down_24dp" />
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollViewContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/station_icon"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginBottom="24dp"
-            android:background="?attr/colorSecondary"
-            android:contentDescription="@string/descr_player_station_image"
-            app:shapeAppearanceOverlay="@style/Circle"
-            app:srcCompat="@drawable/ic_default_station_image_64dp" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/player_station_name"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-            android:textColor="?attr/colorOnSurface" />
+            android:padding="16dp">
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/player_station_metadata"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="48dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="?attr/colorOnSurface" />
+            <TextView
+                android:id="@+id/textViewGeneralInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxHeight="72sp"
+                android:minHeight="36sp"
+                android:textAlignment="center"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeMinTextSize="14sp"
+                android:autoSizeTextType="uniform"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Radio Station Info" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/stationIcon"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="24dp"
+                android:background="?attr/colorSecondary"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewGeneralInfo"
+                app:shapeAppearanceOverlay="@style/Circle"
+                app:srcCompat="@drawable/ic_default_station_image_64dp" />
 
-            <ImageButton
-                android:id="@+id/player_previous_button"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/descr_expanded_player_metadata_previous_button"
-                android:padding="8dp"
-                app:srcCompat="@drawable/ic_player_extended_chevron_left_24dp" />
+            <TextView
+                android:id="@+id/playerStationName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textColor="?attr/colorOnSurface"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/stationIcon"
+                tools:text="Station Name" />
 
-            <ImageButton
-                android:id="@+id/player_play_button"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:background="@drawable/selector_play_button"
-                android:contentDescription="@string/descr_player_playback_button"
-                android:scaleType="center"
-                app:srcCompat="@drawable/ic_player_play_symbol_48dp" />
+            <TextView
+                android:id="@+id/playerStationMetadata"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/playerStationName"
+                tools:text="Now Playing Metadata" />
 
-            <ImageButton
-                android:id="@+id/player_next_button"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/descr_expanded_player_metadata_next_button"
-                android:padding="8dp"
-                app:srcCompat="@drawable/ic_player_extended_chevron_right_24dp" />
+            <TextView
+                android:id="@+id/textViewTimePlayed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata"
+                tools:text="3:44" />
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/textViewNetworkUsageInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata"
+                tools:text="128kbps" />
 
-        <ImageButton
-            android:id="@+id/player_fav_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/descr_expanded_player_sleep_timer_start_button"
-            android:padding="8dp"
-            android:visibility="invisible"
-            app:srcCompat="@drawable/ic_player_extended_sleep_timer_24dp" />
+            <TextView
+                android:id="@+id/textViewTimeCached"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewTimePlayed"
+                tools:text="Cached: 10s" />
 
-    </LinearLayout>
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="?android:attr/dividerVertical"
+                app:layout_constraintTop_toBottomOf="@id/textViewTimeCached" />
 
-</com.google.android.material.card.MaterialCardView>
+            <LinearLayout
+                android:id="@+id/layoutPlaybackControls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/divider1">
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/buttonPrev"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/description_btn_skip_to_previous"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_skip_previous_circle" />
+
+                <ImageButton
+                    android:id="@+id/buttonPlay"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/detail_play"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_play_circle" />
+
+                <ImageButton
+                    android:id="@+id/buttonNext"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/description_btn_skip_to_next"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/ic_skip_next_circle" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <View
+        android:id="@+id/dividerBottom"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerVertical" />
+
+    <ImageButton
+        android:id="@+id/buttonFullscreenExit"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_exit_fullscreen"
+        app:srcCompat="@drawable/ic_player_extended_chevron_down_24dp" />
+
+</LinearLayout>
