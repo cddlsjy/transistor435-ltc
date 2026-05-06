@@ -31,13 +31,9 @@ class PlayerFullFragment : Fragment() {
     private var initialStation: Station? = null
     private var initialIsPlaying: Boolean = false
 
-    private lateinit var textViewGeneralInfo: TextView
     private lateinit var stationIcon: ImageView
     private lateinit var playerStationName: TextView
     private lateinit var playerStationMetadata: TextView
-    private lateinit var textViewTimePlayed: TextView
-    private lateinit var textViewNetworkUsageInfo: TextView
-    private lateinit var textViewTimeCached: TextView
     private lateinit var buttonPrev: ImageButton
     private lateinit var buttonPlay: ImageButton
     private lateinit var buttonNext: ImageButton
@@ -58,13 +54,9 @@ class PlayerFullFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val rootView = inflater.inflate(R.layout.fragment_player_full, container, false)
 
-        textViewGeneralInfo = rootView.findViewById(R.id.textViewGeneralInfo)
         stationIcon = rootView.findViewById(R.id.stationIcon)
         playerStationName = rootView.findViewById(R.id.playerStationName)
         playerStationMetadata = rootView.findViewById(R.id.playerStationMetadata)
-        textViewTimePlayed = rootView.findViewById(R.id.textViewTimePlayed)
-        textViewNetworkUsageInfo = rootView.findViewById(R.id.textViewNetworkUsageInfo)
-        textViewTimeCached = rootView.findViewById(R.id.textViewTimeCached)
         buttonPrev = rootView.findViewById(R.id.buttonPrev)
         buttonPlay = rootView.findViewById(R.id.buttonPlay)
         buttonNext = rootView.findViewById(R.id.buttonNext)
@@ -110,7 +102,6 @@ class PlayerFullFragment : Fragment() {
 
     fun updatePlayerViews(context: Context, station: Station, isPlaying: Boolean) {
         playerStationName.text = station.name
-        textViewGeneralInfo.text = station.name
 
         if (isPlaying) {
             buttonPlay.setImageResource(R.drawable.ic_stop_circle)
@@ -143,21 +134,5 @@ class PlayerFullFragment : Fragment() {
             playerStationMetadata.text = metadata
             playerStationMetadata.isSelected = true
         }
-    }
-
-    fun updateTimePlayed(time: String) {
-        textViewTimePlayed.text = time
-    }
-
-    fun updateNetworkUsage(info: String) {
-        textViewNetworkUsageInfo.text = info
-    }
-
-    fun updateTimeCached(info: String) {
-        textViewTimeCached.text = info
-    }
-
-    fun setGeneralInfo(info: String) {
-        textViewGeneralInfo.text = info
     }
 }

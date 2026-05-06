@@ -24,22 +24,6 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewGeneralInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:maxHeight="72sp"
-                android:minHeight="36sp"
-                android:textAlignment="center"
-                android:autoSizeMaxTextSize="30sp"
-                android:autoSizeMinTextSize="14sp"
-                android:autoSizeTextType="uniform"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Radio Station Info" />
-
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/stationIcon"
                 android:layout_width="200dp"
@@ -49,7 +33,7 @@
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewGeneralInfo"
+                app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearanceOverlay="@style/Circle"
                 app:srcCompat="@drawable/ic_default_station_image_64dp" />
 
@@ -86,56 +70,14 @@
                 app:layout_constraintTop_toBottomOf="@id/playerStationName"
                 tools:text="Now Playing Metadata" />
 
-            <TextView
-                android:id="@+id/textViewTimePlayed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata"
-                tools:text="3:44" />
-
-            <TextView
-                android:id="@+id/textViewNetworkUsageInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata"
-                tools:text="128kbps" />
-
-            <TextView
-                android:id="@+id/textViewTimeCached"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewTimePlayed"
-                tools:text="Cached: 10s" />
-
-            <View
-                android:id="@+id/divider1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="?android:attr/dividerVertical"
-                app:layout_constraintTop_toBottomOf="@id/textViewTimeCached" />
-
             <LinearLayout
                 android:id="@+id/layoutPlaybackControls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="32dp"
                 android:gravity="center"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/divider1">
+                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata">
 
                 <Space
                     android:layout_width="0dp"
