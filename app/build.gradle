@@ -10,7 +10,7 @@ android {
     defaultConfig {
         compileSdk 36
         applicationId "org.y20k.transistor"
-        minSdkVersion 25
+        minSdkVersion 23
         targetSdkVersion 36
         versionCode 112
         versionName "4.3.5"
