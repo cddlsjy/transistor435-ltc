@@ -1,13 +1,6 @@
 /*
  * PlayerFullFragment.kt
  * Implements the full screen player
- *
- * This file is part of
- * TRANSISTOR - Radio App for Android
- *
- * Copyright (c) 2015-25 - Y20K.org
- * Licensed under the MIT-License
- * http://opensource.org/licenses/MIT
  */
 
 package org.y20k.transistor
@@ -23,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import org.y20k.transistor.core.Station
+import org.y20k.transistor.helpers.PreferencesHelper
 
 class PlayerFullFragment : Fragment() {
 
@@ -31,13 +25,15 @@ class PlayerFullFragment : Fragment() {
     private var initialStation: Station? = null
     private var initialIsPlaying: Boolean = false
 
-    private lateinit var stationIcon: ImageView
-    private lateinit var playerStationName: TextView
-    private lateinit var playerStationMetadata: TextView
-    private lateinit var buttonPrev: ImageButton
-    private lateinit var buttonPlay: ImageButton
-    private lateinit var buttonNext: ImageButton
-    private lateinit var buttonFullscreenExit: ImageButton
+    private var stationIcon: ImageView? = null
+    private var playerStationName: TextView? = null
+    private var playerStationMetadata: TextView? = null
+    private var textViewStationInfo: TextView? = null
+    private var textViewMetadata: TextView? = null
+    private var buttonPrev: ImageButton? = null
+    private var buttonPlay: ImageButton? = null
+    private var buttonNext: ImageButton? = null
+    private var buttonFullscreenExit: ImageButton? = null
 
     interface PlayerFullFragmentListener {
         fun onPlayButtonTapped()
@@ -52,9 +48,18 @@ class PlayerFullFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val rootView = inflater.inflate(R.layout.fragment_player_full, container, false)
+        val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
+        val layoutId = when (displayMode) {
+            Keys.FULL_SCREEN_MODE_PORTRAIT -> R.layout.fragment_player_full_portrait
+            Keys.FULL_SCREEN_MODE_LANDSCAPE -> R.layout.fragment_player_full_landscape
+            else -> R.layout.fragment_player_full
+        }
+
+        val rootView = inflater.inflate(layoutId, container, false)
 
         stationIcon = rootView.findViewById(R.id.stationIcon)
+        textViewStationInfo = rootView.findViewById(R.id.textViewStationInfo)
+        textViewMetadata = rootView.findViewById(R.id.textViewMetadata)
         playerStationName = rootView.findViewById(R.id.playerStationName)
         playerStationMetadata = rootView.findViewById(R.id.playerStationMetadata)
         buttonPrev = rootView.findViewById(R.id.buttonPrev)
@@ -62,10 +67,10 @@ class PlayerFullFragment : Fragment() {
         buttonNext = rootView.findViewById(R.id.buttonNext)
         buttonFullscreenExit = rootView.findViewById(R.id.buttonFullscreenExit)
 
-        buttonPrev.setOnClickListener { listener?.onPreviousButtonTapped() }
-        buttonPlay.setOnClickListener { listener?.onPlayButtonTapped() }
-        buttonNext.setOnClickListener { listener?.onNextButtonTapped() }
-        buttonFullscreenExit.setOnClickListener { listener?.onExitFullscreen() }
+        buttonPrev?.setOnClickListener { listener?.onPreviousButtonTapped() }
+        buttonPlay?.setOnClickListener { listener?.onPlayButtonTapped() }
+        buttonNext?.setOnClickListener { listener?.onNextButtonTapped() }
+        buttonFullscreenExit?.setOnClickListener { listener?.onExitFullscreen() }
 
         rootView.isFocusableInTouchMode = true
         rootView.requestFocus()
@@ -101,14 +106,15 @@ class PlayerFullFragment : Fragment() {
     }
 
     fun updatePlayerViews(context: Context, station: Station, isPlaying: Boolean) {
-        playerStationName.text = station.name
+        playerStationName?.text = station.name
+        textViewStationInfo?.text = station.name
 
         if (isPlaying) {
-            buttonPlay.setImageResource(R.drawable.ic_stop_circle)
-            buttonPlay.contentDescription = getString(R.string.detail_stop)
+            buttonPlay?.setImageResource(R.drawable.ic_stop_circle)
+            buttonPlay?.contentDescription = getString(R.string.detail_stop)
         } else {
-            buttonPlay.setImageResource(R.drawable.ic_play_circle)
-            buttonPlay.contentDescription = getString(R.string.detail_play)
+            buttonPlay?.setImageResource(R.drawable.ic_play_circle)
+            buttonPlay?.contentDescription = getString(R.string.detail_play)
         }
 
         try {
@@ -116,23 +122,25 @@ class PlayerFullFragment : Fragment() {
                 com.bumptech.glide.Glide.with(context)
                     .load(station.image)
                     .error(R.drawable.ic_default_station_image_64dp)
-                    .into(stationIcon)
+                    .into(stationIcon!!)
             } else {
                 com.bumptech.glide.Glide.with(context)
                     .load(R.drawable.ic_default_station_image_64dp)
-                    .into(stationIcon)
+                    .into(stationIcon!!)
             }
         } catch (e: Exception) {
             com.bumptech.glide.Glide.with(context)
                 .load(R.drawable.ic_default_station_image_64dp)
-                .into(stationIcon)
+                .into(stationIcon!!)
         }
     }
 
     fun updateMetadata(metadata: String?) {
         if (!metadata.isNullOrEmpty()) {
-            playerStationMetadata.text = metadata
-            playerStationMetadata.isSelected = true
+            playerStationMetadata?.text = metadata
+            playerStationMetadata?.isSelected = true
+            textViewMetadata?.text = metadata
+            textViewMetadata?.isSelected = true
         }
     }
 }

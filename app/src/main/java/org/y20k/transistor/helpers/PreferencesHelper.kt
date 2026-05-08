@@ -365,4 +365,18 @@ object PreferencesHelper {
         }
     }
 
+
+    /* Loads value of the option: Full Screen Display Mode */
+    fun loadFullScreenDisplayMode(): String {
+        return sharedPreferences.getString(Keys.PREF_FULL_SCREEN_DISPLAY_MODE, Keys.FULL_SCREEN_MODE_DEFAULT) ?: Keys.FULL_SCREEN_MODE_DEFAULT
+    }
+
+
+    /* Saves value of the option: Full Screen Display Mode */
+    fun saveFullScreenDisplayMode(mode: String) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_FULL_SCREEN_DISPLAY_MODE, mode)
+        }
+    }
+
 }

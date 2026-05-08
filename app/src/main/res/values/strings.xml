@@ -121,6 +121,7 @@
     <string name="descr_expanded_player_sleep_timer_remaining_time">Time remaining on sleep timer</string>
     <string name="descr_expanded_player_sleep_timer_start_button">Start sleep timer</string>
     <string name="descr_expanded_player_exit_fullscreen">Exit fullscreen</string>
+    <string name="pref_full_screen_display_mode_summary">当前：</string>
     <string name="descr_player_station_image">Station image</string>
     <string name="descr_player_playback_button">Play/pause</string>
     <!-- Onboarding -->

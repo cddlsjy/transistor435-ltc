@@ -181,6 +181,25 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceAutoFullScreenPlayback.summaryOff = "应用启动后播放器保持最小化状态"
         preferenceAutoFullScreenPlayback.setDefaultValue(PreferencesHelper.loadAutoFullScreenPlayback())
 
+        // set up "Full Screen Display Mode" preference
+        val preferenceFullScreenDisplayMode: ListPreference = ListPreference(activity as Context)
+        preferenceFullScreenDisplayMode.title = "全屏播放显示方案"
+        preferenceFullScreenDisplayMode.setIcon(R.drawable.ic_play_circle_outline_24dp)
+        preferenceFullScreenDisplayMode.key = Keys.PREF_FULL_SCREEN_DISPLAY_MODE
+        preferenceFullScreenDisplayMode.summary = "${getString(R.string.pref_full_screen_display_mode_summary)} ${getDisplayModeName(PreferencesHelper.loadFullScreenDisplayMode())}"
+        preferenceFullScreenDisplayMode.entries = arrayOf("默认显示", "竖屏优化", "横屏风格")
+        preferenceFullScreenDisplayMode.entryValues = arrayOf(Keys.FULL_SCREEN_MODE_DEFAULT, Keys.FULL_SCREEN_MODE_PORTRAIT, Keys.FULL_SCREEN_MODE_LANDSCAPE)
+        preferenceFullScreenDisplayMode.setDefaultValue(Keys.FULL_SCREEN_MODE_DEFAULT)
+        preferenceFullScreenDisplayMode.setOnPreferenceChangeListener { preference, newValue ->
+            if (preference is ListPreference) {
+                val index: Int = preference.entryValues.indexOf(newValue)
+                preferenceFullScreenDisplayMode.summary = "${getString(R.string.pref_full_screen_display_mode_summary)} ${preference.entries[index]}"
+                true
+            } else {
+                false
+            }
+        }
+
         // set up "Update Station Images" preference
         val preferenceUpdateStationImages: Preference = Preference(activity as Context)
         preferenceUpdateStationImages.title = getString(R.string.pref_update_station_images_title)
@@ -299,6 +318,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         preferenceCategoryGeneral.contains(preferenceEnableTapAnywherePlayback)
         preferenceCategoryGeneral.contains(preferenceAutoPlayLastStation)
         preferenceCategoryGeneral.contains(preferenceAutoFullScreenPlayback)
+        preferenceCategoryGeneral.contains(preferenceFullScreenDisplayMode)
 
         val preferenceCategoryMaintenance: PreferenceCategory = PreferenceCategory(activity as Context)
         preferenceCategoryMaintenance.title = getString(R.string.pref_maintenance_title)
@@ -327,6 +347,7 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         screen.addPreference(preferenceEnableTapAnywherePlayback)
         screen.addPreference(preferenceAutoPlayLastStation)
         screen.addPreference(preferenceAutoFullScreenPlayback)
+        screen.addPreference(preferenceFullScreenDisplayMode)
         screen.addPreference(preferenceCategoryMaintenance)
         screen.addPreference(preferenceUpdateStationImages)
 //        screen.addPreference(preferenceUpdateCollection)
@@ -527,6 +548,17 @@ class SettingsFragment: PreferenceFragmentCompat(), YesNoDialog.YesNoDialogListe
         val mainActivity = activity as? BaseMainActivity
         if (mainActivity != null) {
             setListDragListener(mainActivity.layout as SettingsListDragListener)
+        }
+    }
+
+
+    /* Gets display mode name for summary */
+    private fun getDisplayModeName(mode: String): String {
+        return when (mode) {
+            Keys.FULL_SCREEN_MODE_DEFAULT -> "默认显示"
+            Keys.FULL_SCREEN_MODE_PORTRAIT -> "竖屏优化"
+            Keys.FULL_SCREEN_MODE_LANDSCAPE -> "横屏风格"
+            else -> "默认显示"
         }
     }
 

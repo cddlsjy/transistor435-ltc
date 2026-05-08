@@ -108,6 +108,7 @@ object Keys {
     const val PREF_EDIT_STREAMS_URIS: String = "EDIT_STREAMS_URIS"
     const val PREF_AUTO_PLAY_LAST_STATION: String = "AUTO_PLAY_LAST_STATION"
     const val PREF_AUTO_FULL_SCREEN_PLAYBACK: String = "AUTO_FULL_SCREEN_PLAYBACK"
+    const val PREF_FULL_SCREEN_DISPLAY_MODE: String = "FULL_SCREEN_DISPLAY_MODE"
 
 
     // states
@@ -234,6 +235,11 @@ object Keys {
     const val STATE_THEME_FOLLOW_SYSTEM: String = "stateFollowSystem"
     const val STATE_THEME_LIGHT_MODE: String = "stateLightMode"
     const val STATE_THEME_DARK_MODE: String = "stateDarkMode"
+
+    // fullscreen display modes
+    const val FULL_SCREEN_MODE_DEFAULT: String = "mode_default"
+    const val FULL_SCREEN_MODE_PORTRAIT: String = "mode_portrait"
+    const val FULL_SCREEN_MODE_LANDSCAPE: String = "mode_landscape"
 
     // unique names
     const val NAME_PERIODIC_COLLECTION_UPDATE_WORK: String = "PERIODIC_COLLECTION_UPDATE_WORK"
