@@ -30,9 +30,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:textSize="28sp"
-                android:textColor="@color/text_on_dark_blue"
-                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/text_secondary_on_dark_blue"
                 android:minHeight="48dp"
                 tools:text="AsiaFM高清音乐台" />
 
@@ -41,8 +40,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:textSize="18sp"
-                android:textColor="@color/text_secondary_on_dark_blue"
+                android:textSize="28sp"
+                android:textColor="@color/text_on_dark_blue"
+                android:textStyle="bold"
                 android:layout_marginTop="8dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
@@ -95,19 +95,15 @@
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_skip_previous_circle" />
 
-        <com.google.android.material.imageview.ShapeableImageView
+        <ImageButton
             android:id="@+id/buttonPlay"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
-            android:background="@color/background_dark_blue"
-            android:clickable="true"
-            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/detail_play"
             android:scaleType="fitCenter"
-            android:padding="12dp"
-            app:shapeAppearanceOverlay="@style/Circle"
             app:srcCompat="@drawable/ic_play_circle" />
 
         <ImageButton
