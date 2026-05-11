@@ -31,7 +31,7 @@ class PlayerFullFragment : Fragment() {
     private var textViewStationInfo: TextView? = null
     private var textViewMetadata: TextView? = null
     private var buttonPrev: ImageButton? = null
-    private var buttonPlay: ImageButton? = null
+    private var buttonPlay: View? = null
     private var buttonNext: ImageButton? = null
     private var buttonFullscreenExit: ImageButton? = null
 
@@ -121,6 +121,19 @@ class PlayerFullFragment : Fragment() {
         }
     }
 
+    private fun setPlayButtonImage(resourceId: Int, contentDescription: String) {
+        when (buttonPlay) {
+            is android.widget.ImageButton -> {
+                (buttonPlay as android.widget.ImageButton).setImageResource(resourceId)
+                (buttonPlay as android.widget.ImageButton).contentDescription = contentDescription
+            }
+            is com.google.android.material.imageview.ShapeableImageView -> {
+                (buttonPlay as com.google.android.material.imageview.ShapeableImageView).setImageResource(resourceId)
+                (buttonPlay as com.google.android.material.imageview.ShapeableImageView).contentDescription = contentDescription
+            }
+        }
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is PlayerFullFragmentListener) {
@@ -138,11 +151,9 @@ class PlayerFullFragment : Fragment() {
         textViewStationInfo?.text = station.name
 
         if (isPlaying) {
-            buttonPlay?.setImageResource(R.drawable.ic_pause_circle)
-            buttonPlay?.contentDescription = getString(R.string.detail_pause)
+            setPlayButtonImage(R.drawable.ic_pause_circle, getString(R.string.detail_pause))
         } else {
-            buttonPlay?.setImageResource(R.drawable.ic_play_circle)
-            buttonPlay?.contentDescription = getString(R.string.detail_play)
+            setPlayButtonImage(R.drawable.ic_play_circle, getString(R.string.detail_play))
         }
 
         try {
