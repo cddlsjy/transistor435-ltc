@@ -48,6 +48,12 @@ class PlayerFullFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val backgroundMode = PreferencesHelper.loadFullScreenBackgroundMode()
+        
+        if (backgroundMode == Keys.BACKGROUND_MODE_DARK_BLUE) {
+            return createDarkBlueLayout(inflater, container)
+        }
+
         val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
         val layoutId = when (displayMode) {
             Keys.FULL_SCREEN_MODE_PORTRAIT -> R.layout.fragment_player_full_portrait
@@ -56,9 +62,31 @@ class PlayerFullFragment : Fragment() {
         }
 
         val rootView = inflater.inflate(layoutId, container, false)
+        setupViews(rootView)
+        setupListeners()
+        setupKeyListener(rootView)
 
-        applyBackgroundMode(rootView)
+        initialStation?.let { station ->
+            updatePlayerViews(requireContext(), station, initialIsPlaying)
+        }
 
+        return rootView
+    }
+
+    private fun createDarkBlueLayout(inflater: LayoutInflater, container: ViewGroup?): View {
+        val rootView = inflater.inflate(R.layout.fragment_player_full_dark_blue, container, false)
+        setupViews(rootView)
+        setupListeners()
+        setupKeyListener(rootView)
+
+        initialStation?.let { station ->
+            updatePlayerViews(requireContext(), station, initialIsPlaying)
+        }
+
+        return rootView
+    }
+
+    private fun setupViews(rootView: View) {
         stationIcon = rootView.findViewById(R.id.stationIcon)
         textViewStationInfo = rootView.findViewById(R.id.textViewStationInfo)
         textViewMetadata = rootView.findViewById(R.id.textViewMetadata)
@@ -68,12 +96,16 @@ class PlayerFullFragment : Fragment() {
         buttonPlay = rootView.findViewById(R.id.buttonPlay)
         buttonNext = rootView.findViewById(R.id.buttonNext)
         buttonFullscreenExit = rootView.findViewById(R.id.buttonFullscreenExit)
+    }
 
+    private fun setupListeners() {
         buttonPrev?.setOnClickListener { listener?.onPreviousButtonTapped() }
         buttonPlay?.setOnClickListener { listener?.onPlayButtonTapped() }
         buttonNext?.setOnClickListener { listener?.onNextButtonTapped() }
         buttonFullscreenExit?.setOnClickListener { listener?.onExitFullscreen() }
+    }
 
+    private fun setupKeyListener(rootView: View) {
         rootView.isFocusableInTouchMode = true
         rootView.requestFocus()
         rootView.setOnKeyListener { _, keyCode, event ->
@@ -87,32 +119,6 @@ class PlayerFullFragment : Fragment() {
                 }
             } else false
         }
-
-        initialStation?.let { station ->
-            updatePlayerViews(requireContext(), station, initialIsPlaying)
-        }
-
-        return rootView
-    }
-
-    private fun applyBackgroundMode(rootView: View) {
-        val backgroundMode = PreferencesHelper.loadFullScreenBackgroundMode()
-        when (backgroundMode) {
-            Keys.BACKGROUND_MODE_DARK_BLUE -> {
-                rootView.setBackgroundColor(resources.getColor(R.color.background_dark_blue))
-                updateTextColorsForDarkBackground()
-            }
-            else -> {
-                rootView.setBackgroundResource(R.attr.colorSurface)
-            }
-        }
-    }
-
-    private fun updateTextColorsForDarkBackground() {
-        playerStationName?.setTextColor(resources.getColor(R.color.text_on_dark_blue))
-        textViewStationInfo?.setTextColor(resources.getColor(R.color.text_on_dark_blue))
-        playerStationMetadata?.setTextColor(resources.getColor(R.color.text_secondary_on_dark_blue))
-        textViewMetadata?.setTextColor(resources.getColor(R.color.text_secondary_on_dark_blue))
     }
 
     override fun onAttach(context: Context) {
