@@ -379,4 +379,18 @@ object PreferencesHelper {
         }
     }
 
+
+    /* Loads value of the option: Full Screen Background Mode */
+    fun loadFullScreenBackgroundMode(): String {
+        return sharedPreferences.getString(Keys.PREF_FULL_SCREEN_BACKGROUND_MODE, Keys.BACKGROUND_MODE_DEFAULT) ?: Keys.BACKGROUND_MODE_DEFAULT
+    }
+
+
+    /* Saves value of the option: Full Screen Background Mode */
+    fun saveFullScreenBackgroundMode(mode: String) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_FULL_SCREEN_BACKGROUND_MODE, mode)
+        }
+    }
+
 }

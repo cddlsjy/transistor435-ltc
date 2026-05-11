@@ -103,6 +103,7 @@
     <string name="pref_user_interface_transparency_effect_title">User interface transparency effect</string>
     <!-- Accessibility Descriptions -->
     <string name="detail_play">Play</string>
+    <string name="detail_pause">Pause</string>
     <string name="detail_stop">Stop</string>
     <string name="description_btn_skip_to_previous">Skip to previous station</string>
     <string name="description_btn_skip_to_next">Skip to next station</string>
@@ -122,6 +123,7 @@
     <string name="descr_expanded_player_sleep_timer_start_button">Start sleep timer</string>
     <string name="descr_expanded_player_exit_fullscreen">Exit fullscreen</string>
     <string name="pref_full_screen_display_mode_summary">当前：</string>
+    <string name="pref_full_screen_background_mode_summary">当前：</string>
     <string name="descr_player_station_image">Station image</string>
     <string name="descr_player_playback_button">Play/pause</string>
     <!-- Onboarding -->

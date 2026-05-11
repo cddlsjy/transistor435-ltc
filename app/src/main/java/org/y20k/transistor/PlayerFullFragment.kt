@@ -57,6 +57,8 @@ class PlayerFullFragment : Fragment() {
 
         val rootView = inflater.inflate(layoutId, container, false)
 
+        applyBackgroundMode(rootView)
+
         stationIcon = rootView.findViewById(R.id.stationIcon)
         textViewStationInfo = rootView.findViewById(R.id.textViewStationInfo)
         textViewMetadata = rootView.findViewById(R.id.textViewMetadata)
@@ -93,6 +95,26 @@ class PlayerFullFragment : Fragment() {
         return rootView
     }
 
+    private fun applyBackgroundMode(rootView: View) {
+        val backgroundMode = PreferencesHelper.loadFullScreenBackgroundMode()
+        when (backgroundMode) {
+            Keys.BACKGROUND_MODE_DARK_BLUE -> {
+                rootView.setBackgroundColor(resources.getColor(R.color.background_dark_blue))
+                updateTextColorsForDarkBackground()
+            }
+            else -> {
+                rootView.setBackgroundResource(R.attr.colorSurface)
+            }
+        }
+    }
+
+    private fun updateTextColorsForDarkBackground() {
+        playerStationName?.setTextColor(resources.getColor(R.color.text_on_dark_blue))
+        textViewStationInfo?.setTextColor(resources.getColor(R.color.text_on_dark_blue))
+        playerStationMetadata?.setTextColor(resources.getColor(R.color.text_secondary_on_dark_blue))
+        textViewMetadata?.setTextColor(resources.getColor(R.color.text_secondary_on_dark_blue))
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is PlayerFullFragmentListener) {
@@ -110,8 +132,8 @@ class PlayerFullFragment : Fragment() {
         textViewStationInfo?.text = station.name
 
         if (isPlaying) {
-            buttonPlay?.setImageResource(R.drawable.ic_stop_circle)
-            buttonPlay?.contentDescription = getString(R.string.detail_stop)
+            buttonPlay?.setImageResource(R.drawable.ic_pause_circle)
+            buttonPlay?.contentDescription = getString(R.string.detail_pause)
         } else {
             buttonPlay?.setImageResource(R.drawable.ic_play_circle)
             buttonPlay?.contentDescription = getString(R.string.detail_play)
