@@ -326,6 +326,24 @@ abstract class BaseMainActivity : AppCompatActivity(),
     }
 
 
+    /* Implements PlayerFullFragmentListener - Handle orientation change */
+    override fun onOrientationChanged() {
+        if (isFullscreenMode) {
+            val collection = org.y20k.transistor.helpers.FileHelper.readCollection(this)
+            if (collection.stations.isNotEmpty() && playerState.stationPosition >= 0 && playerState.stationPosition < collection.stations.size) {
+                fullPlayerFragment = PlayerFullFragment().apply {
+                    setInitialData(collection.stations[playerState.stationPosition], playerState.isPlaying)
+                }
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fullscreen_player_container, fullPlayerFragment!!)
+                    .commit()
+                    
+                requestMetadataUpdate()
+            }
+        }
+    }
+
+
     /* Enter fullscreen mode */
     private fun enterFullscreenMode() {
         if (isFullscreenMode) return
@@ -346,6 +364,8 @@ abstract class BaseMainActivity : AppCompatActivity(),
         supportFragmentManager.beginTransaction()
             .add(R.id.fullscreen_player_container, fullPlayerFragment!!)
             .commit()
+            
+        requestMetadataUpdate()
     }
 
 

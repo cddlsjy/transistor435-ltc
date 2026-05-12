@@ -380,4 +380,18 @@ object PreferencesHelper {
     }
 
 
+    /* Loads value of the option: Full Screen Background Color */
+    fun loadFullScreenBackgroundColor(): String {
+        return sharedPreferences.getString(Keys.PREF_FULL_SCREEN_BACKGROUND_COLOR, Keys.BACKGROUND_COLOR_WHITE) ?: Keys.BACKGROUND_COLOR_WHITE
+    }
+
+
+    /* Saves value of the option: Full Screen Background Color */
+    fun saveFullScreenBackgroundColor(color: String) {
+        sharedPreferences.edit {
+            putString(Keys.PREF_FULL_SCREEN_BACKGROUND_COLOR, color)
+        }
+    }
+
+
     }

@@ -6,6 +6,7 @@
 package org.y20k.transistor
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -24,6 +25,7 @@ class PlayerFullFragment : Fragment() {
     private var listener: PlayerFullFragmentListener? = null
     private var initialStation: Station? = null
     private var initialIsPlaying: Boolean = false
+    private var currentMetadata: String? = null
 
     private var stationIcon: ImageView? = null
     private var playerStationName: TextView? = null
@@ -40,19 +42,30 @@ class PlayerFullFragment : Fragment() {
         fun onPreviousButtonTapped()
         fun onNextButtonTapped()
         fun onExitFullscreen()
+        fun onOrientationChanged()
     }
 
-    fun setInitialData(station: Station, isPlaying: Boolean) {
+    fun setInitialData(station: Station, isPlaying: Boolean, metadata: String? = null) {
         initialStation = station
         initialIsPlaying = isPlaying
+        currentMetadata = metadata
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
-        val layoutId = when (displayMode) {
-            Keys.FULL_SCREEN_MODE_LANDSCAPE -> R.layout.fragment_player_full_landscape
-            Keys.FULL_SCREEN_MODE_DARK_BLUE -> R.layout.fragment_player_full_dark_blue
-            Keys.FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE -> R.layout.fragment_player_full_landscape_dark_blue
+        val backgroundColor = PreferencesHelper.loadFullScreenBackgroundColor()
+        
+        val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val effectiveDisplayMode = if (displayMode == Keys.FULL_SCREEN_MODE_AUTO) {
+            if (isLandscape) Keys.FULL_SCREEN_MODE_LANDSCAPE else Keys.FULL_SCREEN_MODE_DEFAULT
+        } else {
+            displayMode
+        }
+        
+        val layoutId = when {
+            effectiveDisplayMode == Keys.FULL_SCREEN_MODE_LANDSCAPE && backgroundColor == Keys.BACKGROUND_COLOR_DARK_BLUE -> R.layout.fragment_player_full_landscape_dark_blue
+            effectiveDisplayMode == Keys.FULL_SCREEN_MODE_LANDSCAPE -> R.layout.fragment_player_full_landscape
+            backgroundColor == Keys.BACKGROUND_COLOR_DARK_BLUE -> R.layout.fragment_player_full_dark_blue
             else -> R.layout.fragment_player_full
         }
 
@@ -115,12 +128,31 @@ class PlayerFullFragment : Fragment() {
         listener = null
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("currentMetadata", currentMetadata)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.let {
+            currentMetadata = it.getString("currentMetadata")
+        }
+    }
+
     fun updatePlayerViews(context: Context, station: Station, isPlaying: Boolean) {
         playerStationName?.text = station.name
         textViewStationInfo?.text = station.name
+        
+        playerStationMetadata?.text = currentMetadata ?: station.name
+        textViewMetadata?.text = currentMetadata ?: station.name
+        if (!currentMetadata.isNullOrEmpty()) {
+            playerStationMetadata?.isSelected = true
+            textViewMetadata?.isSelected = true
+        }
 
-        val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
-        val useWhiteIcons = displayMode == Keys.FULL_SCREEN_MODE_DARK_BLUE || displayMode == Keys.FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE
+        val backgroundColor = PreferencesHelper.loadFullScreenBackgroundColor()
+        val useWhiteIcons = backgroundColor == Keys.BACKGROUND_COLOR_DARK_BLUE
         if (isPlaying) {
             buttonPlay?.setImageResource(if (useWhiteIcons) R.drawable.ic_pause_symbol_white else R.drawable.ic_pause_symbol)
             buttonPlay?.contentDescription = getString(R.string.detail_pause)
@@ -148,11 +180,20 @@ class PlayerFullFragment : Fragment() {
     }
 
     fun updateMetadata(metadata: String?) {
+        currentMetadata = metadata
         if (!metadata.isNullOrEmpty()) {
             playerStationMetadata?.text = metadata
             playerStationMetadata?.isSelected = true
             textViewMetadata?.text = metadata
             textViewMetadata?.isSelected = true
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
+        if (displayMode == Keys.FULL_SCREEN_MODE_AUTO) {
+            listener?.onOrientationChanged()
         }
     }
 }

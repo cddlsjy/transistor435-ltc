@@ -242,6 +242,12 @@ object Keys {
     const val FULL_SCREEN_MODE_LANDSCAPE: String = "mode_landscape"
     const val FULL_SCREEN_MODE_DARK_BLUE: String = "mode_dark_blue"
     const val FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE: String = "mode_landscape_dark_blue"
+    const val FULL_SCREEN_MODE_AUTO: String = "mode_auto"
+    
+    // fullscreen background colors
+    const val PREF_FULL_SCREEN_BACKGROUND_COLOR: String = "FULL_SCREEN_BACKGROUND_COLOR"
+    const val BACKGROUND_COLOR_WHITE: String = "color_white"
+    const val BACKGROUND_COLOR_DARK_BLUE: String = "color_dark_blue"
 
     // unique names
     const val NAME_PERIODIC_COLLECTION_UPDATE_WORK: String = "PERIODIC_COLLECTION_UPDATE_WORK"
