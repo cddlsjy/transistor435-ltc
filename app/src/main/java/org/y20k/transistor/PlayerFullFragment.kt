@@ -48,33 +48,15 @@ class PlayerFullFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val backgroundMode = PreferencesHelper.loadFullScreenBackgroundMode()
-        
-        if (backgroundMode == Keys.BACKGROUND_MODE_DARK_BLUE) {
-            return createDarkBlueLayout(inflater, container)
-        }
-
         val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
         val layoutId = when (displayMode) {
-            Keys.FULL_SCREEN_MODE_PORTRAIT -> R.layout.fragment_player_full_portrait
             Keys.FULL_SCREEN_MODE_LANDSCAPE -> R.layout.fragment_player_full_landscape
+            Keys.FULL_SCREEN_MODE_DARK_BLUE -> R.layout.fragment_player_full_dark_blue
+            Keys.FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE -> R.layout.fragment_player_full_landscape_dark_blue
             else -> R.layout.fragment_player_full
         }
 
         val rootView = inflater.inflate(layoutId, container, false)
-        setupViews(rootView)
-        setupListeners()
-        setupKeyListener(rootView)
-
-        initialStation?.let { station ->
-            updatePlayerViews(requireContext(), station, initialIsPlaying)
-        }
-
-        return rootView
-    }
-
-    private fun createDarkBlueLayout(inflater: LayoutInflater, container: ViewGroup?): View {
-        val rootView = inflater.inflate(R.layout.fragment_player_full_dark_blue, container, false)
         setupViews(rootView)
         setupListeners()
         setupKeyListener(rootView)
@@ -137,11 +119,13 @@ class PlayerFullFragment : Fragment() {
         playerStationName?.text = station.name
         textViewStationInfo?.text = station.name
 
+        val displayMode = PreferencesHelper.loadFullScreenDisplayMode()
+        val useWhiteIcons = displayMode == Keys.FULL_SCREEN_MODE_DARK_BLUE || displayMode == Keys.FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE
         if (isPlaying) {
-            buttonPlay?.setImageResource(R.drawable.ic_pause_circle)
+            buttonPlay?.setImageResource(if (useWhiteIcons) R.drawable.ic_pause_symbol_white else R.drawable.ic_pause_symbol)
             buttonPlay?.contentDescription = getString(R.string.detail_pause)
         } else {
-            buttonPlay?.setImageResource(R.drawable.ic_play_circle)
+            buttonPlay?.setImageResource(if (useWhiteIcons) R.drawable.ic_play_symbol_white else R.drawable.ic_play_symbol)
             buttonPlay?.contentDescription = getString(R.string.detail_play)
         }
 

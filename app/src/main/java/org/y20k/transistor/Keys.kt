@@ -240,11 +240,8 @@ object Keys {
     const val FULL_SCREEN_MODE_DEFAULT: String = "mode_default"
     const val FULL_SCREEN_MODE_PORTRAIT: String = "mode_portrait"
     const val FULL_SCREEN_MODE_LANDSCAPE: String = "mode_landscape"
-
-    // fullscreen background modes
-    const val PREF_FULL_SCREEN_BACKGROUND_MODE: String = "FULL_SCREEN_BACKGROUND_MODE"
-    const val BACKGROUND_MODE_DEFAULT: String = "background_default"
-    const val BACKGROUND_MODE_DARK_BLUE: String = "background_dark_blue"
+    const val FULL_SCREEN_MODE_DARK_BLUE: String = "mode_dark_blue"
+    const val FULL_SCREEN_MODE_LANDSCAPE_DARK_BLUE: String = "mode_landscape_dark_blue"
 
     // unique names
     const val NAME_PERIODIC_COLLECTION_UPDATE_WORK: String = "PERIODIC_COLLECTION_UPDATE_WORK"

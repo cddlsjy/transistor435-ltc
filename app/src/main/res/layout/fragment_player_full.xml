@@ -44,8 +44,8 @@
                 android:layout_marginTop="24dp"
                 android:gravity="center"
                 android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-                android:textColor="?attr/colorOnSurface"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/stationIcon"
@@ -63,8 +63,8 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:singleLine="true"
                 android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textColor="?attr/colorOnSurface"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/playerStationName"
@@ -91,17 +91,18 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/description_btn_skip_to_previous"
                     android:scaleType="fitXY"
+                    android:tint="@color/black"
                     app:srcCompat="@drawable/ic_skip_previous_circle" />
 
                 <ImageButton
                     android:id="@+id/buttonPlay"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:layout_marginHorizontal="24dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/detail_play"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/ic_play_circle" />
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_play_symbol" />
 
                 <ImageButton
                     android:id="@+id/buttonNext"
@@ -110,6 +111,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/description_btn_skip_to_next"
                     android:scaleType="fitXY"
+                    android:tint="@color/black"
                     app:srcCompat="@drawable/ic_skip_next_circle" />
 
                 <Space
@@ -136,6 +138,7 @@
         android:layout_margin="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/descr_expanded_player_exit_fullscreen"
+        android:tint="@color/black"
         app:srcCompat="@drawable/ic_player_extended_chevron_down_24dp" />
 
 </LinearLayout>

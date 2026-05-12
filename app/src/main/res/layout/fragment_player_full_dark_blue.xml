@@ -13,63 +13,116 @@
         android:layout_height="1dp"
         android:background="#FF3E5A73" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollViewContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewStationInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textSize="18sp"
-                android:textColor="@color/text_secondary_on_dark_blue"
-                android:minHeight="48dp"
-                tools:text="AsiaFM高清音乐台" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/stationIcon"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="24dp"
+                android:background="#FF3E5A73"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/Circle"
+                app:srcCompat="@drawable/ic_default_station_image_64dp" />
 
             <TextView
-                android:id="@+id/textViewMetadata"
+                android:id="@+id/playerStationName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textSize="28sp"
-                android:textColor="@color/text_on_dark_blue"
-                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+                android:textColor="@color/text_secondary_on_dark_blue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/stationIcon"
+                tools:text="Station Name" />
+
+            <TextView
+                android:id="@+id/playerStationMetadata"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:gravity="center"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:singleLine="true"
-                tools:text="许巍 - 我们" />
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textColor="@color/text_on_dark_blue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/playerStationName"
+                tools:text="Now Playing Metadata" />
 
-            <FrameLayout
+            <LinearLayout
+                android:id="@+id/layoutPlaybackControls"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="24dp">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/playerStationMetadata">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/stationIcon"
-                    android:layout_width="180dp"
-                    android:layout_height="180dp"
-                    android:layout_gravity="center"
-                    android:background="#FF3E5A73"
-                    android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/Circle"
-                    app:srcCompat="@drawable/ic_default_station_image_64dp" />
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
 
-            </FrameLayout>
+                <ImageButton
+                    android:id="@+id/buttonPrev"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/description_btn_skip_to_previous"
+                    android:scaleType="fitXY"
+                    android:tint="@color/text_on_dark_blue"
+                    app:srcCompat="@drawable/ic_skip_previous_circle" />
 
-        </LinearLayout>
-    </ScrollView>
+                <ImageButton
+                    android:id="@+id/buttonPlay"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/detail_play"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_play_symbol_white" />
+
+                <ImageButton
+                    android:id="@+id/buttonNext"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/description_btn_skip_to_next"
+                    android:scaleType="fitXY"
+                    android:tint="@color/text_on_dark_blue"
+                    app:srcCompat="@drawable/ic_skip_next_circle" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <View
         android:id="@+id/dividerBottom"
@@ -77,60 +130,15 @@
         android:layout_height="1dp"
         android:background="#FF3E5A73" />
 
-    <LinearLayout
-        android:id="@+id/layoutPlaybackControls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="16dp"
-        android:background="#FF0F2A3E">
-
-        <ImageButton
-            android:id="@+id/buttonPrev"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/description_btn_skip_to_previous"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_skip_previous_circle" />
-
-        <ImageButton
-            android:id="@+id/buttonPlay"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/detail_play"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_play_circle" />
-
-        <ImageButton
-            android:id="@+id/buttonNext"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/description_btn_skip_to_next"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_skip_next_circle" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/buttonFullscreenExit"
+        android:layout_width="56dp"
         android:layout_height="56dp"
-        android:gravity="center">
-
-        <ImageButton
-            android:id="@+id/buttonFullscreenExit"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/descr_expanded_player_exit_fullscreen"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_player_extended_chevron_down_24dp" />
-
-    </LinearLayout>
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/descr_expanded_player_exit_fullscreen"
+        android:tint="@color/text_on_dark_blue"
+        app:srcCompat="@drawable/ic_player_extended_chevron_down_24dp" />
 
 </LinearLayout>
